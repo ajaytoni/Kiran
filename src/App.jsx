@@ -5,6 +5,10 @@ export default function App() {
   const [showQuote, setShowQuote] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedGuide, setSelectedGuide] = useState(null);
+  const [searchCity, setSearchCity] = useState("");
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationMessage, setLocationMessage] = useState("");
 
   const company = {
     name: "Kiran Packers And Movers",
@@ -16,6 +20,54 @@ export default function App() {
       "9-1-218, Street No. 7, Mukarampura, Mahalaxmi Supermarket, Karimnagar-505002, Telangana",
     maps:
       "https://www.google.com/maps/search/?api=1&query=Nain+Packers+And+Movers%2C+9-1-218%2C+Street+No.+7%2C+Mukarampura%2C+Karimnagar%2C+Telangana",
+  };
+
+  const getUserLocation = () => {
+
+    if (!navigator.geolocation) {
+      setLocationMessage(
+        "Location access is not supported by this browser."
+      );
+      return;
+    }
+
+    setLocationMessage("Requesting location access...");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        setUserLocation({
+          latitude,
+          longitude,
+        });
+
+        setLocationMessage(
+          "Your current location has been accessed successfully."
+        );
+      },
+      (error) => {
+        if (error.code === 1) {
+          setLocationMessage(
+            "Location access was denied. Please allow location permission in your browser."
+          );
+        } else if (error.code === 2) {
+          setLocationMessage(
+            "Your location could not be determined. Please try again."
+          );
+        } else {
+          setLocationMessage(
+            "Unable to access your location right now. Please try again."
+          );
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const services = [
@@ -102,20 +154,409 @@ export default function App() {
     },
   ];
 
-  const areas = [
-    "Mukarampura",
-    "Karimnagar",
-    "Mankammathota",
-    "Vidyanagar",
-    "Rekurthi",
-    "Bhagatnagar",
-    "Kothapalli",
-    "Choppadandi",
-    "Huzurabad",
-    "Jagtial",
-    "Peddapalli",
-    "Warangal",
+  const serviceAreas = [
+    {
+      city: "Karimnagar",
+      district: "Karimnagar",
+      location: "Karimnagar, Telangana, India",
+      distance: "Local service area",
+      localPrice: "₹2,000",
+      oneBHK: "₹5,500",
+      twoBHK: "₹8,000",
+      threeBHK: "₹11,500",
+      office: "₹7,000",
+    },
+
+    {
+      city: "Bhupalapally",
+      district: "Jayashankar Bhupalapally",
+      location:
+        "Bhupalapally, Jayashankar Bhupalapally, Telangana, India",
+      distance: "Approx. 120 km from Karimnagar",
+      localPrice: "₹2,500",
+      oneBHK: "₹6,500",
+      twoBHK: "₹9,500",
+      threeBHK: "₹13,500",
+      office: "₹8,000",
+    },
+
+    {
+      city: "Peddapalli",
+      district: "Peddapalli",
+      location: "Peddapalli, Telangana, India",
+      distance: "Approx. 40 km from Karimnagar",
+      localPrice: "₹2,000",
+      oneBHK: "₹5,500",
+      twoBHK: "₹8,000",
+      threeBHK: "₹11,500",
+      office: "₹7,000",
+    },
+
+    {
+      city: "Ramagundam",
+      district: "Peddapalli",
+      location: "Ramagundam, Peddapalli, Telangana, India",
+      distance: "Approx. 65 km from Karimnagar",
+      localPrice: "₹2,200",
+      oneBHK: "₹5,800",
+      twoBHK: "₹8,500",
+      threeBHK: "₹12,000",
+      office: "₹7,500",
+    },
+
+    {
+      city: "Mancherial",
+      district: "Mancherial",
+      location: "Mancherial, Telangana, India",
+      distance: "Approx. 75 km from Karimnagar",
+      localPrice: "₹2,500",
+      oneBHK: "₹6,000",
+      twoBHK: "₹9,000",
+      threeBHK: "₹12,500",
+      office: "₹7,500",
+    },
+
+    {
+      city: "Jagtial",
+      district: "Jagtial",
+      location: "Jagtial, Telangana, India",
+      distance: "Approx. 50 km from Karimnagar",
+      localPrice: "₹2,000",
+      oneBHK: "₹5,500",
+      twoBHK: "₹8,000",
+      threeBHK: "₹11,000",
+      office: "₹7,000",
+    },
+
+    {
+      city: "Sircilla",
+      district: "Rajanna Sircilla",
+      location: "Sircilla, Rajanna Sircilla, Telangana, India",
+      distance: "Approx. 65 km from Karimnagar",
+      localPrice: "₹2,200",
+      oneBHK: "₹5,800",
+      twoBHK: "₹8,500",
+      threeBHK: "₹11,500",
+      office: "₹7,000",
+    },
+
+    {
+      city: "Vemulawada",
+      district: "Rajanna Sircilla",
+      location: "Vemulawada, Rajanna Sircilla, Telangana, India",
+      distance: "Approx. 50 km from Karimnagar",
+      localPrice: "₹2,000",
+      oneBHK: "₹5,500",
+      twoBHK: "₹8,000",
+      threeBHK: "₹11,000",
+      office: "₹7,000",
+    },
+
+    {
+      city: "Siddipet",
+      district: "Siddipet",
+      location: "Siddipet, Telangana, India",
+      distance: "Approx. 110 km from Karimnagar",
+      localPrice: "₹2,800",
+      oneBHK: "₹6,500",
+      twoBHK: "₹9,500",
+      threeBHK: "₹13,500",
+      office: "₹8,000",
+    },
+
+    {
+      city: "Warangal",
+      district: "Warangal",
+      location: "Warangal, Telangana, India",
+      distance: "Approx. 150 km from Karimnagar",
+      localPrice: "₹3,000",
+      oneBHK: "₹7,000",
+      twoBHK: "₹10,500",
+      threeBHK: "₹15,000",
+      office: "₹9,000",
+    },
+
+    {
+      city: "Hanamkonda",
+      district: "Hanamkonda",
+      location: "Hanamkonda, Telangana, India",
+      distance: "Approx. 150 km from Karimnagar",
+      localPrice: "₹3,000",
+      oneBHK: "₹7,000",
+      twoBHK: "₹10,500",
+      threeBHK: "₹15,000",
+      office: "₹9,000",
+    },
+
+    {
+      city: "Hyderabad",
+      district: "Hyderabad",
+      location: "Hyderabad, Telangana, India",
+      distance: "Approx. 165 km from Karimnagar",
+      localPrice: "₹3,500",
+      oneBHK: "₹8,000",
+      twoBHK: "₹12,000",
+      threeBHK: "₹17,000",
+      office: "₹10,000",
+    },
+
+    {
+      city: "Secunderabad",
+      district: "Hyderabad",
+      location: "Secunderabad, Telangana, India",
+      distance: "Approx. 165 km from Karimnagar",
+      localPrice: "₹3,500",
+      oneBHK: "₹8,000",
+      twoBHK: "₹12,000",
+      threeBHK: "₹17,000",
+      office: "₹10,000",
+    },
+
+    {
+      city: "Nizamabad",
+      district: "Nizamabad",
+      location: "Nizamabad, Telangana, India",
+      distance: "Approx. 125 km from Karimnagar",
+      localPrice: "₹3,000",
+      oneBHK: "₹7,000",
+      twoBHK: "₹10,500",
+      threeBHK: "₹14,500",
+      office: "₹9,000",
+    },
+
+    {
+      city: "Adilabad",
+      district: "Adilabad",
+      location: "Adilabad, Telangana, India",
+      distance: "Approx. 160 km from Karimnagar",
+      localPrice: "₹3,500",
+      oneBHK: "₹7,500",
+      twoBHK: "₹11,000",
+      threeBHK: "₹15,500",
+      office: "₹9,500",
+    },
+
+    {
+      city: "Khammam",
+      district: "Khammam",
+      location: "Khammam, Telangana, India",
+      distance: "Approx. 220 km from Karimnagar",
+      localPrice: "₹4,000",
+      oneBHK: "₹8,500",
+      twoBHK: "₹13,000",
+      threeBHK: "₹18,000",
+      office: "₹11,000",
+    },
+
+    {
+      city: "Nalgonda",
+      district: "Nalgonda",
+      location: "Nalgonda, Telangana, India",
+      distance: "Approx. 220 km from Karimnagar",
+      localPrice: "₹4,000",
+      oneBHK: "₹8,500",
+      twoBHK: "₹13,000",
+      threeBHK: "₹18,000",
+      office: "₹11,000",
+    },
+
+    {
+      city: "Suryapet",
+      district: "Suryapet",
+      location: "Suryapet, Telangana, India",
+      distance: "Approx. 190 km from Karimnagar",
+      localPrice: "₹3,500",
+      oneBHK: "₹8,000",
+      twoBHK: "₹12,000",
+      threeBHK: "₹17,000",
+      office: "₹10,000",
+    },
+
+    {
+      city: "Mahbubnagar",
+      district: "Mahbubnagar",
+      location: "Mahbubnagar, Telangana, India",
+      distance: "Approx. 300 km from Karimnagar",
+      localPrice: "₹4,500",
+      oneBHK: "₹9,000",
+      twoBHK: "₹14,000",
+      threeBHK: "₹20,000",
+      office: "₹12,000",
+    },
+
+    {
+      city: "Medak",
+      district: "Medak",
+      location: "Medak, Telangana, India",
+      distance: "Approx. 180 km from Karimnagar",
+      localPrice: "₹3,500",
+      oneBHK: "₹8,000",
+      twoBHK: "₹12,000",
+      threeBHK: "₹17,000",
+      office: "₹10,000",
+    },
+
+    {
+      city: "Bhongir",
+      district: "Yadadri Bhuvanagiri",
+      location:
+        "Bhongir, Yadadri Bhuvanagiri, Telangana, India",
+      distance: "Approx. 190 km from Karimnagar",
+      localPrice: "₹3,500",
+      oneBHK: "₹8,000",
+      twoBHK: "₹12,000",
+      threeBHK: "₹17,000",
+      office: "₹10,000",
+    },
+
+    {
+      city: "Jangaon",
+      district: "Jangaon",
+      location: "Jangaon, Telangana, India",
+      distance: "Approx. 150 km from Karimnagar",
+      localPrice: "₹3,000",
+      oneBHK: "₹7,000",
+      twoBHK: "₹10,500",
+      threeBHK: "₹15,000",
+      office: "₹9,000",
+    },
+
+    {
+      city: "Kothagudem",
+      district: "Bhadradri Kothagudem",
+      location:
+        "Kothagudem, Bhadradri Kothagudem, Telangana, India",
+      distance: "Approx. 270 km from Karimnagar",
+      localPrice: "₹4,500",
+      oneBHK: "₹9,000",
+      twoBHK: "₹14,000",
+      threeBHK: "₹20,000",
+      office: "₹12,000",
+    },
+
+    {
+      city: "Miryalaguda",
+      district: "Nalgonda",
+      location: "Miryalaguda, Nalgonda, Telangana, India",
+      distance: "Approx. 250 km from Karimnagar",
+      localPrice: "₹4,000",
+      oneBHK: "₹8,500",
+      twoBHK: "₹13,000",
+      threeBHK: "₹18,000",
+      office: "₹11,000",
+    },
+
+    {
+      city: "Huzurabad",
+      district: "Karimnagar",
+      location: "Huzurabad, Karimnagar district, Telangana, India",
+      distance: "Approx. 40 km from Karimnagar",
+      localPrice: "₹2,000",
+      oneBHK: "₹5,500",
+      twoBHK: "₹8,000",
+      threeBHK: "₹11,000",
+      office: "₹7,000",
+    },
+
+    {
+      city: "Manakondur",
+      district: "Karimnagar",
+      location: "Manakondur, Karimnagar district, Telangana, India",
+      distance: "Approx. 25 km from Karimnagar",
+      localPrice: "₹1,800",
+      oneBHK: "₹5,000",
+      twoBHK: "₹7,500",
+      threeBHK: "₹10,500",
+      office: "₹6,500",
+    },
+
+    {
+      city: "Choppadandi",
+      district: "Karimnagar",
+      location: "Choppadandi, Karimnagar district, Telangana, India",
+      distance: "Approx. 25 km from Karimnagar",
+      localPrice: "₹1,800",
+      oneBHK: "₹5,000",
+      twoBHK: "₹7,500",
+      threeBHK: "₹10,500",
+      office: "₹6,500",
+    },
+
+    {
+      city: "Jammikunta",
+      district: "Karimnagar",
+      location: "Jammikunta, Telangana, India",
+      distance: "Approx. 60 km from Karimnagar",
+      localPrice: "₹2,200",
+      oneBHK: "₹5,800",
+      twoBHK: "₹8,500",
+      threeBHK: "₹12,000",
+      office: "₹7,500",
+    },
+
+    {
+      city: "Husnabad",
+      district: "Siddipet",
+      location: "Husnabad, Siddipet district, Telangana, India",
+      distance: "Approx. 70 km from Karimnagar",
+      localPrice: "₹2,200",
+      oneBHK: "₹5,800",
+      twoBHK: "₹8,500",
+      threeBHK: "₹12,000",
+      office: "₹7,500",
+    },
+
+    {
+      city: "Korutla",
+      district: "Jagtial",
+      location: "Korutla, Jagtial district, Telangana, India",
+      distance: "Approx. 75 km from Karimnagar",
+      localPrice: "₹2,300",
+      oneBHK: "₹5,800",
+      twoBHK: "₹8,500",
+      threeBHK: "₹12,000",
+      office: "₹7,500",
+    },
+
+    {
+      city: "Metpally",
+      district: "Jagtial",
+      location: "Metpally, Jagtial district, Telangana, India",
+      distance: "Approx. 90 km from Karimnagar",
+      localPrice: "₹2,500",
+      oneBHK: "₹6,000",
+      twoBHK: "₹9,000",
+      threeBHK: "₹12,500",
+      office: "₹7,500",
+    },
+
+    {
+      city: "Dharmapuri",
+      district: "Jagtial",
+      location: "Dharmapuri, Jagtial district, Telangana, India",
+      distance: "Approx. 75 km from Karimnagar",
+      localPrice: "₹2,300",
+      oneBHK: "₹5,800",
+      twoBHK: "₹8,500",
+      threeBHK: "₹12,000",
+      office: "₹7,500",
+    },
   ];
+
+  const filteredCities = serviceAreas.filter((area) => {
+    const search = searchCity.trim().toLowerCase();
+
+    if (!search) {
+      return true;
+    }
+
+    return (
+      area.city.toLowerCase().includes(search) ||
+      area.district.toLowerCase().includes(search) ||
+      area.location.toLowerCase().includes(search)
+    );
+  });
+
 
   const guides = [
     {
@@ -322,6 +763,10 @@ export default function App() {
           animation: totalBlink 3.8s ease-in-out infinite;
         }
 
+        .contact-card .blink-text {
+          color: #ffffff;
+        }
+
         .reveal {
           opacity: 0;
           transform: translateY(24px);
@@ -497,24 +942,12 @@ export default function App() {
         ========================= */
 
         .hero {
-          min-height: calc(100vh - 132px);
+          min-height: 485px;
           position: relative;
           overflow: hidden;
           display: flex;
           align-items: center;
-
-          background:
-            radial-gradient(
-              circle at 88% 20%,
-              rgba(217, 107, 39, 0.45),
-              transparent 28%
-            ),
-            linear-gradient(
-              115deg,
-              #061A30 0%,
-              #061A30 54%,
-              #D96B27 100%
-            );
+          background: #061A30;
         }
 
         .hero::before {
@@ -545,7 +978,7 @@ export default function App() {
           z-index: 2;
           width: min(1240px, calc(100% - 40px));
           margin: 0 auto;
-          padding: 70px 0;
+          padding: 22px 0;
           text-align: left;
         }
 
@@ -563,7 +996,7 @@ export default function App() {
           font-weight: 800;
           letter-spacing: 1px;
           text-transform: uppercase;
-          margin-bottom: 24px;
+          margin-bottom: 14px;
         }
 
         .hero h1 {
@@ -586,7 +1019,7 @@ export default function App() {
           color: #e7f1ff;
           font-size: 18px;
           line-height: 1.75;
-          margin: 28px 0 0;
+          margin: 12px 0 0;
           text-align: left;
         }
 
@@ -596,7 +1029,7 @@ export default function App() {
           align-items: center;
           gap: 13px;
           flex-wrap: wrap;
-          margin-top: 34px;
+          margin-top: 15px;
         }
 
         .btn {
@@ -633,7 +1066,7 @@ export default function App() {
         }
 
         .hero-contact {
-          margin-top: 45px;
+          margin-top: 17px;
           display: flex;
           justify-content: flex-start;
           gap: 30px;
@@ -662,7 +1095,7 @@ export default function App() {
         .trust-strip {
           background: #0B2A4A;
           color: #ffffff;
-          padding: 18px 0;
+          padding: 14px 0;
         }
 
         .trust-grid {
@@ -709,11 +1142,24 @@ export default function App() {
         ========================= */
 
         .section {
-          padding: 72px 0;
+          padding: 30px 0;
         }
 
         .section.alt {
           background: #edf5fd;
+        }
+
+        .section.faq-section {
+          background: #dce8f3;
+        }
+
+        .section.services-section {
+          background: #061A30;
+        }
+
+        .services-section .section-heading h2,
+        .services-section .section-heading p {
+          color: #ffffff;
         }
 
         .section.dark {
@@ -724,7 +1170,7 @@ export default function App() {
         .section-heading {
           width: 100%;
           max-width: 780px;
-          margin: 0 0 40px;
+          margin: 0 0 18px;
           text-align: left;
         }
 
@@ -758,7 +1204,7 @@ export default function App() {
         .section-heading p {
           color: #66768b;
           line-height: 1.75;
-          margin: 15px 0 0;
+          margin: 9px 0 0;
           font-size: 16px;
           text-align: left;
         }
@@ -774,12 +1220,13 @@ export default function App() {
         .about-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 50px;
-          align-items: center;
+          gap: 28px;
+          align-items: stretch;
         }
 
         .about-image {
-          min-height: 470px;
+          height: 100%;
+          min-height: 330px;
           border-radius: 18px;
 
           background:
@@ -820,7 +1267,7 @@ export default function App() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 12px;
-          margin-top: 25px;
+          margin-top: 18px;
         }
 
         .point {
@@ -859,8 +1306,8 @@ export default function App() {
           background: #ffffff;
           border: 1px solid #d8e5f1;
           border-radius: 15px;
-          padding: 27px;
-          min-height: 260px;
+          padding: 18px;
+          min-height: 195px;
           text-align: left;
           transition: 0.35s;
         }
@@ -881,7 +1328,7 @@ export default function App() {
           background: #e7f1ff;
           border: 2px solid #c9ddf2;
           font-size: 26px;
-          margin-bottom: 20px;
+          margin-bottom: 14px;
         }
 
         .service-card h3 {
@@ -933,7 +1380,7 @@ export default function App() {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          padding: 25px;
+          padding: 18px;
           background: #123D63;
           border-radius: 15px;
           border: 1px solid
@@ -955,7 +1402,7 @@ export default function App() {
           border-radius: 12px;
           background: rgba(217, 107, 39, 0.16);
           font-size: 27px;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
         }
 
         .advantage-card h3 {
@@ -994,9 +1441,9 @@ export default function App() {
           align-items: flex-start;
           background: #ffffff;
           border: 1px solid #d5e3f1;
-          padding: 23px;
+          padding: 16px;
           border-radius: 14px;
-          min-height: 235px;
+          min-height: 175px;
           text-align: left;
           transition: 0.3s;
         }
@@ -1021,7 +1468,7 @@ export default function App() {
           font-family: Georgia, serif;
           font-size: 19px;
           line-height: 1.3;
-          margin: 16px 0 9px;
+          margin: 12px 0 7px;
           text-align: left;
         }
 
@@ -1047,7 +1494,7 @@ export default function App() {
         }
 
         .area-pill {
-          padding: 11px 16px;
+          padding: 9px 14px;
           background: #ffffff;
           border: 1px solid #d3e2f1;
           border-radius: 999px;
@@ -1085,8 +1532,8 @@ export default function App() {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          min-height: 330px;
-          padding: 28px;
+          min-height: 220px;
+          padding: 18px;
           background: #ffffff;
           border: 1px solid #d7e3ef;
           border-radius: 16px;
@@ -1113,7 +1560,7 @@ export default function App() {
           background: #edf5fd;
           border: 2px solid #d4e4f3;
           font-size: 27px;
-          margin-bottom: 20px;
+          margin-bottom: 14px;
           animation: floatUp 3.5s ease-in-out infinite;
         }
 
@@ -1207,7 +1654,7 @@ export default function App() {
             );
 
           color: #ffffff;
-          padding: 70px 0;
+          padding: 32px 0;
           position: relative;
           overflow: hidden;
         }
@@ -1216,7 +1663,7 @@ export default function App() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 35px;
+          gap: 25px;
         }
 
         .cta-inner > div:first-child {
@@ -1261,7 +1708,7 @@ export default function App() {
           background: #ffffff;
           border: 1px solid #d7e4f0;
           border-radius: 13px;
-          padding: 21px;
+          padding: 16px;
           text-align: left;
           transition: 0.3s;
         }
@@ -1301,14 +1748,9 @@ export default function App() {
         }
 
         .contact-card {
-          background:
-            linear-gradient(
-              145deg,
-              #0B2A4A,
-              #174A73
-            );
+          background: #061A30;
           border-radius: 18px;
-          padding: 34px;
+          padding: 22px;
           color: #ffffff;
           text-align: left;
         }
@@ -1332,7 +1774,7 @@ export default function App() {
           align-items: flex-start;
           justify-content: flex-start;
           gap: 13px;
-          margin-top: 20px;
+          margin-top: 15px;
           text-align: left;
         }
 
@@ -1368,7 +1810,7 @@ export default function App() {
           justify-content: flex-start;
           gap: 10px;
           flex-wrap: wrap;
-          margin-top: 27px;
+          margin-top: 20px;
         }
 
         /* =========================
@@ -1376,7 +1818,7 @@ export default function App() {
         ========================= */
 
         .map-card {
-          min-height: 430px;
+          min-height: 320px;
           height: 100%;
           border-radius: 18px;
           overflow: hidden;
@@ -1388,7 +1830,7 @@ export default function App() {
         .map-card iframe {
           width: 100%;
           height: 100%;
-          min-height: 430px;
+          min-height: 320px;
           border: 0;
           display: block;
         }
@@ -1400,15 +1842,15 @@ export default function App() {
         .footer {
           background: #061A30;
           color: #c8d6e5;
-          padding: 42px 0 25px;
+          padding: 28px 0 18px;
         }
 
         .footer-grid {
           display: grid;
           grid-template-columns:
-            1.4fr 1fr 1fr;
-          gap: 45px;
-          padding-bottom: 30px;
+            1.35fr 0.9fr 1.05fr 1.15fr;
+          gap: 28px;
+          padding-bottom: 18px;
           border-bottom: 1px solid
             rgba(255,255,255,0.1);
           text-align: left;
@@ -1457,7 +1899,7 @@ export default function App() {
         }
 
         .footer-bottom {
-          padding-top: 22px;
+          padding-top: 13px;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -1718,7 +2160,7 @@ export default function App() {
           }
 
           .hero-content {
-            padding: 65px 0;
+            padding: 22px 0;
           }
 
           .about-grid,
@@ -1727,7 +2169,7 @@ export default function App() {
           }
 
           .about-image {
-            min-height: 350px;
+            min-height: 320px;
           }
 
           .trust-grid {
@@ -1752,11 +2194,11 @@ export default function App() {
           }
 
           .map-card {
-            min-height: 430px;
+            min-height: 320px;
           }
 
           .map-card iframe {
-            min-height: 430px;
+            min-height: 320px;
           }
 
         }
@@ -1779,7 +2221,7 @@ export default function App() {
           }
 
           .section {
-            padding: 52px 0;
+            padding: 26px 0;
           }
 
           .service-grid,
@@ -1822,7 +2264,7 @@ export default function App() {
           }
 
           .modal {
-            padding: 22px;
+            padding: 18px;
           }
 
           .hero-actions {
@@ -1833,8 +2275,58 @@ export default function App() {
             width: 100%;
           }
 
+          .home-location-button {
+            width: 100%;
+          }
+
           .hero-contact {
             gap: 18px;
+          }
+
+        }
+
+        @media (max-width: 1100px) {
+
+          .sa-cities-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+
+        }
+
+        @media (max-width: 760px) {
+
+          .sa-services-page {
+            padding: 24px 16px 30px;
+          }
+
+          .sa-cities-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+          }
+
+          .sa-city-card {
+            min-height: 230px;
+            padding: 18px;
+          }
+
+          .sa-city-card h2 {
+            font-size: 21px;
+          }
+
+        }
+
+        @media (max-width: 520px) {
+
+          .sa-cities-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .sa-city-card {
+            min-height: 0;
+          }
+
+          .sa-location {
+            min-height: 0;
           }
 
         }
@@ -1858,6 +2350,885 @@ export default function App() {
             animation: none;
           }
 
+        }
+
+        /* ================= SERVICE AREAS ONLY ================= */
+        .home-location-button {
+          min-width: 165px;
+        }
+
+        .home-location-message {
+          margin-top: 13px;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        .home-location-message span {
+          font-weight: 700;
+        }
+
+        .sa-areas-section {
+          padding: 0 !important;
+        }
+
+        .sa-services-page {
+          min-height: 100vh;
+          padding: 26px 20px 32px;
+          background: #061A30;
+        }
+
+        .sa-services-container {
+          width: min(1240px, 100%);
+          margin: 0 auto;
+        }
+
+        .sa-heading {
+          width: min(860px, 100%);
+          margin: 0 auto 14px;
+          text-align: center;
+        }
+
+        .sa-badge {
+          display: inline-block;
+          padding: 8px 17px;
+          margin-bottom: 12px;
+          border-radius: 50px;
+          background: #24170f;
+          color: #f2c66d;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+        }
+
+        .sa-heading h1 {
+          margin: 0;
+          color: #ffffff;
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+          font-size: clamp(34px, 5vw, 56px);
+          line-height: 1.08;
+        }
+
+        .sa-heading p {
+          width: min(760px, 100%);
+          margin: 9px auto 0;
+          color: #f7fbff;
+          font-size: 15px;
+          font-weight: 600;
+          line-height: 1.75;
+          text-align: center;
+          text-shadow: 0 1px 8px rgba(0, 0, 0, 0.28);
+        }
+
+        .hero-main-matter {
+          max-width: 720px;
+          line-height: 1.9 !important;
+          text-align: left;
+        }
+
+        .sa-location-access {
+          width: min(760px, 100%);
+          margin: 0 auto 22px;
+          text-align: center;
+        }
+
+        .sa-location-button {
+          border: 0;
+          border-radius: 12px;
+          padding: 12px 20px;
+          background: #0B2A4A;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 800;
+          cursor: pointer;
+          box-shadow: 0 8px 20px rgba(11, 42, 74, 0.18);
+          transition: 0.25s ease;
+        }
+
+        .sa-location-button:hover {
+          background: #061A30;
+          transform: translateY(-2px);
+        }
+
+        .sa-location-message {
+          margin-top: 10px;
+          color: #6d5d50;
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        .sa-current-location {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 8px 14px;
+          margin-top: 10px;
+          padding: 10px 14px;
+          border: 1px solid #dfc9a6;
+          border-radius: 10px;
+          background: #fffdf9;
+          color: #66584d;
+          font-size: 12px;
+          line-height: 1.5;
+        }
+
+        .sa-current-location button {
+          border: 0;
+          background: transparent;
+          color: #9f6b24;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+          padding: 0;
+        }
+
+        .sa-current-location button:hover {
+          color: #24170f;
+          text-decoration: underline;
+        }
+
+        .sa-search-area {
+          width: min(760px, 100%);
+          margin: 0 auto 20px;
+        }
+
+        .sa-search-wrapper {
+          position: relative;
+        }
+
+        .sa-search-input {
+          width: 100%;
+          height: 62px;
+          padding: 0 60px 0 22px;
+
+          border: 2px solid #dfc9a6;
+          border-radius: 16px;
+          outline: none;
+
+          background: #fffdf9;
+          color: #24170f;
+
+          font-size: 16px;
+
+          box-shadow:
+            0 12px 30px
+            rgba(36, 23, 15, 0.08);
+
+          transition: 0.25s ease;
+        }
+
+        .sa-search-input::placeholder {
+          color: #9a8a7b;
+        }
+
+        .sa-search-input:focus {
+          border-color: #c8953f;
+
+          box-shadow:
+            0 15px 38px
+            rgba(181, 128, 45, 0.18);
+        }
+
+        .sa-search-icon {
+          position: absolute;
+          right: 20px;
+          top: 50%;
+
+          transform:
+            translateY(-50%);
+
+          font-size: 22px;
+          pointer-events: none;
+        }
+
+        .sa-result-count {
+          margin-top: 12px;
+          text-align: center;
+
+          color: #7c6c5e;
+          font-size: 14px;
+        }
+
+        .sa-cities-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 18px;
+          align-items: stretch;
+        }
+
+        .sa-city-card {
+          position: relative;
+          min-height: 250px;
+          display: flex;
+          flex-direction: column;
+          padding: 19px;
+
+          border:
+            1px solid
+            #eadcc7;
+
+          border-radius: 20px;
+
+          background:
+            rgba(
+              255,
+              253,
+              249,
+              0.96
+            );
+
+          cursor: pointer;
+
+          box-shadow:
+            0 8px 25px
+            rgba(36, 23, 15, 0.07);
+
+          transition:
+            transform 0.28s ease,
+            box-shadow 0.28s ease,
+            border-color 0.28s ease;
+        }
+
+        .sa-city-card:hover {
+          transform:
+            translateY(-7px);
+
+          border-color:
+            #d4a14c;
+
+          box-shadow:
+            0 20px 40px
+            rgba(36, 23, 15, 0.14);
+        }
+
+        .sa-city-card::after {
+          content: "";
+
+          position: absolute;
+
+          left: 0;
+          right: 0;
+          bottom: 0;
+
+          height: 3px;
+
+          border-radius:
+            0 0 20px 20px;
+
+          background:
+            linear-gradient(
+              90deg,
+              #9f6b24,
+              #e3b65e
+            );
+
+          transform:
+            scaleX(0);
+
+          transform-origin: left;
+
+          transition:
+            transform 0.3s ease;
+        }
+
+        .sa-city-card:hover::after {
+          transform:
+            scaleX(1);
+        }
+
+        .sa-city-icon {
+          width: 48px;
+          height: 48px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          margin-bottom: 12px;
+
+          border-radius: 50%;
+
+          background: #24170f;
+
+          color: #f2c66d;
+
+          font-size: 21px;
+
+          box-shadow:
+            0 8px 18px
+            rgba(36, 23, 15, 0.15);
+        }
+
+        .sa-city-card h2 {
+          margin: 0 0 8px;
+          min-height: 29px;
+
+          color: #24170f;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 24px;
+        }
+
+        .sa-district {
+          margin: 0 0 10px;
+          min-height: 18px;
+
+          color: #79695b;
+
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .sa-location {
+          margin: 0;
+
+          color: #6b5c4e;
+
+          font-size: 13px;
+
+          line-height: 1.5;
+
+          min-height: 39px;
+        }
+
+        .sa-card-divider {
+          height: 1px;
+
+          margin:
+            17px 0 14px;
+
+          background:
+            #eee2d0;
+        }
+
+        .sa-starting-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          gap: 10px;
+        }
+
+        .sa-starting-label {
+          color: #7b6b5d;
+          font-size: 12px;
+        }
+
+        .sa-starting-price {
+          color: #b67720;
+
+          font-size: 17px;
+
+          font-weight: 800;
+        }
+
+        .sa-view-price {
+          margin-top: auto;
+          padding-top: 14px;
+
+          color: #24170f;
+
+          font-size: 13px;
+
+          font-weight: 800;
+        }
+
+        .sa-no-results {
+          grid-column: 1 / -1;
+
+          padding: 55px 20px;
+
+          text-align: center;
+
+          border:
+            1px solid
+            #eadcc7;
+
+          border-radius: 20px;
+
+          background: #fffdf9;
+        }
+
+        .sa-no-results-icon {
+          font-size: 42px;
+          margin-bottom: 12px;
+        }
+
+        .sa-no-results h3 {
+          margin: 0 0 8px;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 24px;
+        }
+
+        .sa-no-results p {
+          margin: 0;
+
+          color: #7b6b5d;
+        }
+
+        /* POPUP */
+
+        .sa-overlay {
+          position: fixed;
+
+          inset: 0;
+
+          z-index: 9999;
+
+          display: flex;
+
+          align-items: center;
+          justify-content: center;
+
+          padding: 18px;
+
+          background:
+            rgba(
+              20,
+              13,
+              8,
+              0.74
+            );
+
+          backdrop-filter:
+            blur(6px);
+        }
+
+        .sa-modal {
+          width:
+            min(720px, 100%);
+
+          max-height:
+            92vh;
+
+          overflow-y: auto;
+
+          border-radius: 24px;
+
+          background:
+            #fffdf9;
+
+          box-shadow:
+            0 35px 90px
+            rgba(0, 0, 0, 0.38);
+
+          animation:
+            saModalShow
+            0.28s
+            ease;
+        }
+
+        @keyframes saModalShow {
+          from {
+            opacity: 0;
+            transform:
+              translateY(25px)
+              scale(0.96);
+          }
+
+          to {
+            opacity: 1;
+            transform:
+              translateY(0)
+              scale(1);
+          }
+        }
+
+        .sa-modal-header {
+          display: flex;
+
+          justify-content:
+            space-between;
+
+          align-items:
+            flex-start;
+
+          gap: 18px;
+
+          padding: 27px 28px;
+
+          background:
+            #24170f;
+
+          color: white;
+        }
+
+        .sa-modal-header h2 {
+          margin: 0 0 7px;
+
+          color:
+            #f2c66d;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 32px;
+        }
+
+        .sa-modal-header p {
+          margin: 0;
+
+          color:
+            #e5d5c2;
+
+          font-size: 14px;
+        }
+
+        .sa-close-button {
+          width: 40px;
+          height: 40px;
+
+          flex-shrink: 0;
+
+          border: 0;
+          border-radius: 50%;
+
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.12
+            );
+
+          color: white;
+
+          cursor: pointer;
+
+          font-size: 23px;
+
+          transition:
+            0.2s ease;
+        }
+
+        .sa-close-button:hover {
+          background:
+            rgba(
+              255,
+              255,
+              255,
+              0.24
+            );
+
+          transform:
+            rotate(90deg);
+        }
+
+        .sa-modal-body {
+          padding: 26px 28px 30px;
+        }
+
+        .sa-location-box {
+          display: flex;
+
+          align-items:
+            flex-start;
+
+          gap: 14px;
+
+          padding: 17px;
+
+          margin-bottom: 17px;
+
+          border-radius: 15px;
+
+          background:
+            #f8f0e2;
+
+          border:
+            1px solid
+            #eadcc5;
+        }
+
+        .sa-location-icon {
+          width: 43px;
+          height: 43px;
+
+          min-width: 43px;
+
+          display: flex;
+
+          align-items:
+            center;
+
+          justify-content:
+            center;
+
+          border-radius: 50%;
+
+          background:
+            #24170f;
+
+          font-size: 20px;
+        }
+
+        .sa-location-title {
+          margin-bottom: 5px;
+
+          color:
+            #24170f;
+
+          font-size: 14px;
+
+          font-weight: 800;
+        }
+
+        .sa-location-text {
+          color:
+            #66584d;
+
+          font-size: 14px;
+
+          line-height: 1.5;
+        }
+
+        .sa-map-button {
+          width: 100%;
+          margin: 14px 0 18px;
+          padding: 13px 16px;
+          border: 0;
+          border-radius: 12px;
+          background: #061A30;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .sa-map-button:hover {
+          transform: translateY(-1px);
+          opacity: 0.92;
+        }
+
+        .sa-distance-box {
+          padding: 14px 16px;
+
+          margin-bottom: 18px;
+
+          border-radius: 12px;
+
+          background:
+            #fff8eb;
+
+          border:
+            1px solid
+            #eadcc5;
+
+          color:
+            #66584d;
+
+          font-size: 14px;
+        }
+
+        .sa-distance-box strong {
+          color:
+            #24170f;
+        }
+
+        .sa-price-heading {
+          margin:
+            0 0 13px;
+
+          color:
+            #24170f;
+
+          font-family:
+            Georgia,
+            "Times New Roman",
+            serif;
+
+          font-size: 22px;
+        }
+
+        .sa-price-table {
+          width: 100%;
+
+          border-collapse:
+            collapse;
+
+          overflow: hidden;
+
+          border-radius:
+            13px;
+        }
+
+        .sa-price-table th {
+          padding: 15px;
+
+          background:
+            #24170f;
+
+          color:
+            #f2c66d;
+
+          text-align: left;
+
+          font-size: 13px;
+        }
+
+        .sa-price-table th:last-child {
+          text-align:
+            right;
+        }
+
+        .sa-price-table td {
+          padding: 15px;
+
+          border-bottom:
+            1px solid
+            #eadcc5;
+
+          color:
+            #4d4036;
+
+          font-size: 14px;
+        }
+
+        .sa-price-table tr:last-child td {
+          border-bottom: 0;
+        }
+
+        .sa-price-table td:last-child {
+          text-align:
+            right;
+
+          color:
+            #b67720;
+
+          font-weight:
+            800;
+        }
+
+        .sa-service-note {
+          margin-top: 18px;
+
+          padding: 14px;
+
+          border-radius: 12px;
+
+          background:
+            #24170f;
+
+          color:
+            #eadbc8;
+
+          font-size: 13px;
+
+          line-height: 1.6;
+        }
+
+        .sa-service-note strong {
+          color:
+            #f2c66d;
+        }
+
+        .sa-price-note {
+          margin:
+            17px 0 0;
+
+          color:
+            #89796a;
+
+          font-size: 12px;
+
+          line-height: 1.6;
+        }
+
+        @media (max-width: 950px) {
+          .sa-cities-grid {
+            grid-template-columns:
+              repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 620px) {
+          .sa-services-page {
+            padding:
+              32px
+              14px
+              42px;
+          }
+
+          .sa-heading {
+            margin-bottom: 25px;
+          }
+
+          .sa-heading h1 {
+            font-size: 34px;
+          }
+
+          .sa-heading p {
+            font-size: 14px;
+          }
+
+          .sa-cities-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+          }
+
+          .sa-city-card {
+            padding: 20px;
+          }
+
+          .sa-location-access {
+            margin-bottom: 18px;
+          }
+
+          .sa-location-button {
+            width: 100%;
+          }
+
+          .sa-current-location {
+            align-items: flex-start;
+            flex-direction: column;
+            text-align: left;
+          }
+
+          .sa-search-input {
+            height: 56px;
+          }
+
+          .sa-modal-header {
+            padding:
+              22px
+              20px;
+          }
+
+          .sa-modal-header h2 {
+            font-size: 27px;
+          }
+
+          .sa-modal-body {
+            padding:
+              20px;
+          }
+
+          .sa-price-table th,
+          .sa-price-table td {
+            padding:
+              12px 9px;
+          }
+
+          .sa-price-table {
+            font-size: 12px;
+          }
         }
       `}</style>
 
@@ -2037,13 +3408,13 @@ export default function App() {
 
             </h1>
 
-            <p className="blink-text">
+            <p className="blink-text hero-main-matter">
 
-              Kiran Packers And Movers provides
-              practical packing, shifting and
-              relocation support for homes,
-              offices and personal belongings
-              in Karimnagar and beyond.
+              Professional packing and moving support.
+              <br />
+              Careful handling for homes and offices.
+              <br />
+              Reliable relocation assistance across Karimnagar and beyond.
 
             </p>
 
@@ -2066,13 +3437,30 @@ export default function App() {
               </button>
 
               <button
-                className="btn btn-light"
-                onClick={openMaps}
+                className="btn btn-light home-location-button"
+                onClick={getUserLocation}
               >
-                📍 Get Directions
+                📍 Use My Location
               </button>
 
             </div>
+
+            {locationMessage && (
+
+              <div className="home-location-message">
+
+                {locationMessage}
+
+                {userLocation && (
+                  <span>
+                    {" "}({userLocation.latitude.toFixed(5)},{" "}
+                    {userLocation.longitude.toFixed(5)})
+                  </span>
+                )}
+
+              </div>
+
+            )}
 
             <div className="hero-contact">
 
@@ -2288,7 +3676,7 @@ export default function App() {
 
         <section
           id="services"
-          className="section alt"
+          className="section alt services-section"
         >
 
           <div className="container">
@@ -2494,49 +3882,376 @@ export default function App() {
 
         <section
           id="areas"
-          className="section alt"
+          className="section alt sa-areas-section"
         >
 
-          <div className="container">
+          <div className="sa-services-page">
 
-            <div className="section-heading reveal">
+        <div className="sa-services-container">
 
-              <div className="eyebrow">
-                SERVICE AREAS
+          {/* HEADER */}
+
+          <div className="sa-heading">
+
+            <span className="sa-badge">
+              📍 Our Service Areas
+            </span>
+
+            <h1>
+              Packers & Movers
+              <br />
+              Service Areas
+            </h1>
+
+            <p>
+              Find our Packers & Movers services in your city.
+              <br />
+              Search below to find your location quickly.
+              <br />
+              Click any city to view its location, service area and estimated moving prices.
+            </p>
+
               </div>
 
-              <h2 className="blink-text">
-                Moving support around
-                Karimnagar.
-              </h2>
+          {/* SEARCH */}
 
-              <p>
-                We can discuss your pickup
-                and destination requirements
-                for Karimnagar and surrounding
-                areas.
-              </p>
+          <div className="sa-search-area">
+
+            <div className="sa-search-wrapper">
+
+              <input
+                type="text"
+                className="sa-search-input"
+                value={searchCity}
+                onChange={(e) =>
+                  setSearchCity(e.target.value)
+                }
+                placeholder="Search city... e.g. Bhupalapally"
+              />
+
+              <span className="sa-search-icon">
+                🔍
+              </span>
 
             </div>
 
-            <div className="areas-grid reveal">
+            <div className="sa-result-count">
 
-              {areas.map((area) => (
-
-                <div
-                  className="area-pill"
-                  key={area}
-                >
-                  📍 {area}
-                </div>
-
-              ))}
+              {searchCity
+                ? `${filteredCities.length} ${
+                    filteredCities.length === 1
+                      ? "city"
+                      : "cities"
+                  } found`
+                : `${serviceAreas.length} service areas available`}
 
             </div>
 
           </div>
 
+          {/* CITIES */}
+
+          <div className="sa-cities-grid">
+
+            {filteredCities.length > 0 ? (
+
+              filteredCities.map((area) => (
+
+                <div
+                  key={area.city}
+                  className="sa-city-card"
+                  onClick={() =>
+                    setSelectedCity(area)
+                  }
+                >
+
+                  <div className="sa-city-icon">
+                    📍
+                  </div>
+
+                  <h2>
+                    {area.city}
+                  </h2>
+
+                  <p className="sa-district">
+                    {area.district}
+                  </p>
+
+                  <p className="sa-location">
+                    📍 {area.location}
+                  </p>
+
+                  <div className="sa-card-divider" />
+
+                  <div className="sa-starting-row">
+
+                    <span className="sa-starting-label">
+                      Starting from
+                    </span>
+
+                    <span className="sa-starting-price">
+                      {area.localPrice}
+                    </span>
+
+                  </div>
+
+                  <div className="sa-view-price">
+                    View Price & Location →
+                  </div>
+
+                </div>
+
+              ))
+
+            ) : (
+
+              <div className="sa-no-results">
+
+                <div className="sa-no-results-icon">
+                  🔍
+                </div>
+
+                <h3>
+                  City Not Found
+                </h3>
+
+                <p>
+                  Try searching another city or district.
+                </p>
+
+              </div>
+
+            )}
+
+          </div>
+
+        </div>
+
+      </div>
+
         </section>
+
+      {/* CITY DETAILS POPUP */}
+
+      {selectedCity && (
+
+        <div
+          className="sa-overlay"
+          onClick={() =>
+            setSelectedCity(null)
+          }
+        >
+
+          <div
+            className="sa-modal"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+
+            {/* MODAL HEADER */}
+
+            <div className="sa-modal-header">
+
+              <div>
+
+                <h2>
+                  {selectedCity.city}
+                </h2>
+
+                <p>
+                  Packers & Movers Service Area
+                </p>
+
+              </div>
+
+              <button
+                className="sa-close-button"
+                onClick={() =>
+                  setSelectedCity(null)
+                }
+              >
+                ×
+              </button>
+
+            </div>
+
+            {/* MODAL BODY */}
+
+            <div className="sa-modal-body">
+
+              {/* LOCATION */}
+
+              <div className="sa-location-box">
+
+                <div className="sa-location-icon">
+                  📍
+                </div>
+
+                <div>
+
+                  <div className="sa-location-title">
+                    Full Location
+                  </div>
+
+                  <div className="sa-location-text">
+                    {selectedCity.location}
+                  </div>
+
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                className="sa-map-button"
+                onClick={() =>
+                  window.open(
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedCity.location)}`,
+                    "_blank",
+                    "noopener,noreferrer"
+                  )
+                }
+              >
+                📍 Open {selectedCity.city} in Google Maps →
+              </button>
+
+              {/* DISTANCE */}
+
+              <div className="sa-distance-box">
+
+                🚚{" "}
+                <strong>
+                  Service Area:
+                </strong>{" "}
+                {selectedCity.distance}
+
+              </div>
+
+              {/* PRICE */}
+
+              <h3 className="sa-price-heading">
+                💰 Moving Price
+              </h3>
+
+              <table className="sa-price-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Moving Service
+                    </th>
+
+                    <th>
+                      Starting Price
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  <tr>
+
+                    <td>
+                      Local Moving
+                    </td>
+
+                    <td>
+                      {selectedCity.localPrice}
+                    </td>
+
+                  </tr>
+
+                  <tr>
+
+                    <td>
+                      1 BHK Household Shifting
+                    </td>
+
+                    <td>
+                      {selectedCity.oneBHK}
+                    </td>
+
+                  </tr>
+
+                  <tr>
+
+                    <td>
+                      2 BHK Household Shifting
+                    </td>
+
+                    <td>
+                      {selectedCity.twoBHK}
+                    </td>
+
+                  </tr>
+
+                  <tr>
+
+                    <td>
+                      3 BHK Household Shifting
+                    </td>
+
+                    <td>
+                      {selectedCity.threeBHK}
+                    </td>
+
+                  </tr>
+
+                  <tr>
+
+                    <td>
+                      Office / Commercial Shifting
+                    </td>
+
+                    <td>
+                      {selectedCity.office}
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+              {/* SERVICE NOTE */}
+
+              <div className="sa-service-note">
+
+                📍 We provide Packers & Movers
+                services in{" "}
+
+                <strong>
+                  {selectedCity.city}
+                </strong>{" "}
+
+                and nearby areas.
+
+              </div>
+
+              <p className="sa-price-note">
+
+                * Prices shown are estimated
+                starting prices for demonstration.
+                Final charges can vary according
+                to distance, quantity of goods,
+                packing requirements, floor level,
+                lift availability, vehicle type and
+                other moving requirements.
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
 
         {/* MOVING JOURNAL */}
 
@@ -2668,7 +4383,7 @@ export default function App() {
 
         {/* FAQ */}
 
-        <section className="section">
+        <section className="section faq-section">
 
           <div className="container">
 
@@ -2961,17 +4676,31 @@ export default function App() {
                     💬 WhatsApp
                   </button>
 
-                  <button
-                    onClick={openMaps}
-                  >
-                    📍 Google Maps
-                  </button>
+                  <span>
+                    ✉️ {company.email}
+                  </span>
 
                   <span>
-                    {company.address}
+                    📍 {company.address}
                   </span>
 
                 </div>
+
+              </div>
+
+              <div>
+
+                <h3>
+                  Moving Support
+                </h3>
+
+                <p>
+                  Residential shifting, office relocation, packing and unpacking, local moves, intercity relocation and vehicle transportation.
+                </p>
+
+                <p style={{ marginTop: "12px" }}>
+                  Serving Karimnagar and nearby Telangana cities with organised moving support.
+                </p>
 
               </div>
 
