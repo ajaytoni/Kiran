@@ -9,6 +9,31 @@ export default function App() {
   const [selectedCity, setSelectedCity] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [locationMessage, setLocationMessage] = useState("");
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminRole, setAdminRole] = useState("Branch Manager");
+  const [rememberDevice, setRememberDevice] = useState(false);
+  const [showAddLocation, setShowAddLocation] = useState(false);
+  const [customLocations, setCustomLocations] = useState(() => {
+    try {
+      const savedLocations = localStorage.getItem("kiranServiceAreaLocations");
+      if (savedLocations) {
+        const parsedLocations = JSON.parse(savedLocations);
+        return Array.isArray(parsedLocations) ? parsedLocations : [];
+      }
+    } catch (error) {
+      console.error("Unable to load saved service areas.", error);
+    }
+    return [];
+  });
+  const [newLocation, setNewLocation] = useState({
+    city: "",
+    state: "Telangana",
+    startingPrice: "₹3,999",
+    movingTime: "Same-day local support",
+  });
 
   const company = {
     name: "Kiran Packers And Movers",
@@ -558,6 +583,247 @@ export default function App() {
   });
 
 
+  const screenshotServiceAreas = [
+    "Karimnagar",
+    "Peddapalli",
+    "Kamareddy",
+    "Sircilla",
+    "Gajwel",
+    "Jagtial",
+    "Jangaon",
+    "Godavarikhani",
+    "Basanth Nagar",
+    "Manthani",
+    "Bhupalapally",
+    "Hyderabad",
+    "Siddipet",
+    "Rangareddy",
+    "Medak",
+    "Ellareddypet",
+    "Korutla",
+    "Metpally",
+    "Nirmal",
+    "Adilabad",
+    "Madhapur",
+    "Godichirowli",
+    "Kondapur",
+    "High-Tech City",
+    "Medchal",
+    "Pragathi Nagar",
+    "Mumbai",
+    "Thane",
+    "Mulund",
+    "Ghatkopar",
+    "Kurla",
+    "Dadar",
+    "Kalyan",
+    "Dombivli",
+    "Pune",
+    "Bangalore",
+    "Chennai",
+    "Rajahmundry",
+    "Vijayawada",
+    "Visakhapatnam",
+  ].map((city) => {
+    const existing = serviceAreas.find(
+      (area) =>
+        area.city.toLowerCase() === city.toLowerCase()
+    );
+
+    const defaults = {
+      district: "Telangana",
+      location: `${city}, Telangana, India`,
+      distance: "Long-distance service area",
+      localPrice: "₹3,999",
+      oneBHK: "₹6,999",
+      twoBHK: "₹9,999",
+      threeBHK: "₹12,999",
+      office: "₹8,999",
+      areasCovered: "Service available",
+      branch: false,
+    };
+
+    return {
+      ...defaults,
+      ...(existing || {}),
+      city,
+    };
+  });
+
+  const filteredScreenshotServiceAreas = screenshotServiceAreas.filter((area) => {
+    const search = searchCity.trim().toLowerCase();
+
+    if (!search) {
+      return true;
+    }
+
+    return (
+      area.city.toLowerCase().includes(search) ||
+      area.location.toLowerCase().includes(search) ||
+      area.district.toLowerCase().includes(search)
+    );
+  });
+
+  const filteredCustomLocations = customLocations.filter((area) => {
+    const search = searchCity.trim().toLowerCase();
+
+    if (!search) {
+      return true;
+    }
+
+    return (
+      area.city.toLowerCase().includes(search) ||
+      area.location.toLowerCase().includes(search) ||
+      area.district.toLowerCase().includes(search)
+    );
+  });
+
+  const handleAddLocation = (event) => {
+    event.preventDefault();
+
+    const cityName = newLocation.city.trim();
+    const stateName = newLocation.state.trim() || "Telangana";
+
+    if (!cityName) {
+      return;
+    }
+
+    const alreadyExists = [
+      ...screenshotServiceAreas,
+      ...customLocations,
+    ].some(
+      (area) =>
+        area.city.trim().toLowerCase() ===
+        cityName.toLowerCase()
+    );
+
+    if (alreadyExists) {
+      window.alert(`${cityName} is already in Service Areas.`);
+      return;
+    }
+
+    const locationToAdd = {
+      city: cityName,
+      district: stateName,
+      location: `${cityName}, ${stateName}, India`,
+      distance: "Service area available",
+      localPrice: newLocation.startingPrice || "₹3,999",
+      oneBHK: "₹6,999",
+      twoBHK: "₹9,999",
+      threeBHK: "₹12,999",
+      office: "₹8,999",
+      startingPrice: newLocation.startingPrice || "₹3,999",
+      movingTime: newLocation.movingTime || "Same-day local support",
+      areasCovered: "Service available",
+      branch: false,
+    };
+
+    setCustomLocations((current) => [...current, locationToAdd]);
+    setSearchCity("");
+    setNewLocation({
+      city: "",
+      state: "Telangana",
+      startingPrice: "₹3,999",
+      movingTime: "Same-day local support",
+    });
+    setShowAddLocation(false);
+  };
+
+  const handleDeleteCustomLocation = (cityName) => {
+    const confirmed = window.confirm(
+      `Delete ${cityName} from your added Service Areas?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setCustomLocations((current) =>
+      current.filter(
+        (area) =>
+          area.city.trim().toLowerCase() !==
+          cityName.trim().toLowerCase()
+      )
+    );
+
+    if (
+      selectedCity &&
+      selectedCity.city.trim().toLowerCase() ===
+        cityName.trim().toLowerCase()
+    ) {
+      setSelectedCity(null);
+    }
+  };
+
+  const getCityDetails = (city) => {
+    if (city.city === "Korutla") {
+      return {
+        ...city,
+        district: "Telangana",
+        location: "Korutla, Telangana, India",
+        distance: "45 minutes from our Karimnagar base",
+        localPrice: "₹3,999",
+        oneBHK: "₹6,999",
+        twoBHK: "₹9,999",
+        threeBHK: "₹12,999",
+        office: "₹9,999",
+        startingPrice: "₹4,499",
+        movingTime: "5–8 hours for a 2BHK, same-day completion",
+        description:
+          "Korutla is a trading town whose market yard drives constant commercial movement — trader families shifting homes, shops relocating, and agricultural business moves. Just 45 minutes from our Karimnagar base, Korutla gets full same-day service, and our weekly Hyderabad truck offers affordable shared-load options.",
+        landmarks: [
+          "Korutla Bus Stand",
+          "Market Yard",
+          "Metpally Road",
+        ],
+        challenges:
+          "Market-yard area loading happens before 8 AM to avoid trader traffic. Multi-generation joint families here mean large 4–5BHK inventories that need full-day packing with 6-member crews.",
+        testimonial:
+          "Moved our shop and house together over one weekend. Business did not stop for a single day. Superb planning.",
+        testimonialBy:
+          "Raju Goud, Market Yard, Korutla",
+        services: [
+          ["Local Moving", "₹3,999"],
+          ["Long-Distance Moving", "₹12,999"],
+          ["Office Relocation", "₹9,999"],
+          ["Packing & Unpacking", "₹2,499"],
+          ["Car Transportation", "₹6,999"],
+          ["Storage & Warehousing", "₹1,999/mo"],
+          ["Loading & Unloading", "₹1,999"],
+          ["Insurance Coverage", "3% of value"],
+        ],
+      };
+    }
+
+    return {
+      ...city,
+      startingPrice: city.localPrice || "₹3,999",
+      movingTime: "Same-day local support or planned intercity relocation",
+      description:
+        `${city.city} is covered by Kiran Packers And Movers for household, office and commercial relocation requirements. Our team can coordinate packing, loading, transportation and unloading based on the size, distance and moving schedule.`,
+      landmarks: [
+        `${city.city} main area`,
+        `${city.city} market / commercial zone`,
+        `${city.city} transport route`,
+      ],
+      challenges:
+        `Every move in ${city.city} is planned around road access, parking, building access, floor level and the quantity of goods. We coordinate pickup and delivery timing to make the relocation more organised.`,
+      testimonial:
+        `The team handled our shifting carefully and kept the move organised from packing to delivery.`,
+      testimonialBy: `Kiran Packers And Movers customer, ${city.city}`,
+      services: [
+        ["Local Moving", city.localPrice || "₹3,999"],
+        ["Long-Distance Moving", city.threeBHK || "₹12,999"],
+        ["Office Relocation", city.office || "₹8,999"],
+        ["Packing & Unpacking", "₹2,499"],
+        ["Car Transportation", "₹6,999"],
+        ["Storage & Warehousing", "₹1,999/mo"],
+        ["Loading & Unloading", "₹1,999"],
+        ["Insurance Coverage", "3% of value"],
+      ],
+    };
+  };
+
   const guides = [
     {
       icon: "💰",
@@ -610,6 +876,17 @@ export default function App() {
       a: "You can call the listed number, use WhatsApp, or visit the Mukarampura location using the Google Maps button.",
     },
   ];
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "kiranServiceAreaLocations",
+        JSON.stringify(customLocations)
+      );
+    } catch (error) {
+      console.error("Unable to save service areas.", error);
+    }
+  }, [customLocations]);
 
   useEffect(() => {
     const revealItems = document.querySelectorAll(".reveal");
@@ -672,6 +949,35 @@ export default function App() {
 
   const openMaps = () => {
     window.open(company.maps, "_blank");
+  };
+
+  const openAdminPortal = () => {
+    setMobileMenu(false);
+    setShowAdminLogin(true);
+  };
+
+  const closeAdminPortal = () => {
+    setShowAdminLogin(false);
+    setShowAdminPassword(false);
+  };
+
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+
+    if (!adminEmail.trim() || !adminPassword.trim()) {
+      alert("Please enter your email address and password.");
+      return;
+    }
+
+    alert(
+      "Admin authentication is not connected yet. Connect your secure backend authentication to enable dashboard login."
+    );
+  };
+
+  const handleForgotPassword = () => {
+    alert(
+      "Please contact the system administrator to reset your admin password."
+    );
   };
 
   const submitQuote = (e) => {
@@ -858,10 +1164,11 @@ export default function App() {
           border-radius: 50%;
           display: grid;
           place-items: center;
-          background: #071D36;
-          border: 3px solid #D96B27;
-          color: #ffffff;
+          background: #D96B27 !important;
+          border: 0 !important;
+          color: #ffffff !important;
           font-size: 23px;
+          font-weight: 900;
           box-shadow:
             0 6px 18px rgba(0, 0, 0, 0.2);
         }
@@ -907,6 +1214,26 @@ export default function App() {
 
         .nav-links button:hover {
           color: #E18443;
+        }
+
+        .admin-nav-button {
+          border: 1px solid rgba(255, 255, 255, 0.35) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+          color: #ffffff !important;
+          padding: 11px 16px !important;
+          border-radius: 8px;
+          transition: 0.25s;
+        }
+
+        .admin-nav-button:hover {
+          background: #D96B27 !important;
+          border-color: #D96B27 !important;
+          color: #ffffff !important;
+          transform: translateY(-2px);
+        }
+
+        .admin-nav-button:active {
+          transform: translateY(0);
         }
 
         .nav-quote {
@@ -1000,14 +1327,16 @@ export default function App() {
         }
 
         .hero h1 {
-          max-width: 900px;
+          width: 100%;
+          max-width: none;
           margin: 0;
           color: #ffffff;
           font-family: Georgia, serif;
-          font-size: clamp(45px, 6vw, 82px);
-          line-height: 1.03;
-          letter-spacing: -2px;
+          font-size: clamp(40px, 5vw, 64px);
+          line-height: 1.08;
+          letter-spacing: -1.5px;
           text-align: left;
+          white-space: nowrap;
         }
 
         .hero h1 span {
@@ -1015,21 +1344,154 @@ export default function App() {
         }
 
         .hero p {
-          max-width: 700px;
+          width: 100%;
+          max-width: none;
           color: #e7f1ff;
-          font-size: 18px;
-          line-height: 1.75;
+          font-size: 17px;
+          line-height: 1.65;
           margin: 12px 0 0;
           text-align: left;
         }
 
+        .hero-extra-matter {
+          width: 100%;
+          margin: 28px 0 22px;
+        }
+
+        .hero-extra-intro {
+          width: 100%;
+          padding: 20px 24px;
+          border-radius: 17px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .hero-extra-label {
+          margin-bottom: 7px;
+          color: #ffb16f;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 1.7px;
+        }
+
+        .hero-extra-intro h3 {
+          margin: 0 0 8px;
+          color: #ffffff;
+          font-size: 21px;
+        }
+
+        .hero-extra-intro p {
+          margin: 6px 0 0;
+          max-width: 1150px;
+          color: rgba(255, 255, 255, 0.86);
+          font-size: 13.5px;
+          line-height: 1.65;
+        }
+
+        .hero-extra-points {
+          width: 100%;
+          margin-top: 14px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+        }
+
+        .hero-extra-point {
+          min-height: 126px;
+          padding: 16px;
+          border-radius: 15px;
+          background: rgba(255, 255, 255, 0.075);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          display: flex;
+          gap: 11px;
+          align-items: flex-start;
+        }
+
+        .hero-extra-point > span {
+          width: 39px;
+          height: 39px;
+          min-width: 39px;
+          border-radius: 11px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(245, 130, 32, 0.18);
+          font-size: 20px;
+        }
+
+        .hero-extra-point strong {
+          display: block;
+          margin-bottom: 5px;
+          color: #ffffff;
+          font-size: 14px;
+        }
+
+        .hero-extra-point p {
+          margin: 0;
+          color: rgba(255, 255, 255, 0.76);
+          font-size: 11.5px;
+          line-height: 1.5;
+        }
+
+        .hero-bottom-matter {
+          width: 100%;
+          margin-top: 14px;
+          padding: 14px 16px;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+          border-radius: 15px;
+          background: rgba(0, 0, 0, 0.16);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .hero-bottom-matter > div {
+          padding: 3px 11px;
+          border-right: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .hero-bottom-matter > div:last-child {
+          border-right: 0;
+        }
+
+        .hero-bottom-matter strong {
+          display: block;
+          color: #ffffff;
+          font-size: 12.5px;
+          margin-bottom: 4px;
+        }
+
+        .hero-bottom-matter span {
+          display: block;
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 11px;
+          line-height: 1.4;
+        }
+
+        .hero-highlights span {
+          color: #ffffff;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .hero-action-contact-row {
+          width: 100%;
+          margin-top: 15px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 16px;
+        }
+
         .hero-actions {
           display: flex;
-          justify-content: flex-start;
+          justify-content: flex-end;
           align-items: center;
-          gap: 13px;
-          flex-wrap: wrap;
-          margin-top: 15px;
+          gap: 8px;
+          flex-wrap: nowrap;
+          margin-top: 0;
+          flex: 0 0 auto;
+          min-width: max-content;
         }
 
         .btn {
@@ -1066,26 +1528,34 @@ export default function App() {
         }
 
         .hero-contact {
-          margin-top: 17px;
-          display: flex;
-          justify-content: flex-start;
-          gap: 30px;
-          flex-wrap: wrap;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          align-items: center;
+          gap: 12px;
+          min-width: 0;
+          width: 100%;
         }
 
         .hero-contact-item {
           color: #e7f0fb;
-          font-size: 14px;
+          font-size: 12.5px;
           text-align: left;
+          white-space: nowrap;
+          min-width: 0;
+          overflow: visible;
         }
 
         .hero-contact-item strong {
           color: #E18443;
-          display: block;
-          font-size: 11px;
+          display: inline;
+          font-size: 10px;
           letter-spacing: 1px;
           text-transform: uppercase;
-          margin-bottom: 4px;
+          margin-right: 6px;
+        }
+
+        .hero-contact-item span {
+          color: #e7f0fb;
         }
 
         /* =========================
@@ -2076,6 +2546,234 @@ export default function App() {
         }
 
         /* =========================
+           ADMIN LOGIN PORTAL
+        ========================= */
+
+        .admin-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: rgba(3, 15, 31, 0.78);
+          backdrop-filter: blur(8px);
+        }
+
+        .admin-modal {
+          width: min(470px, 100%);
+          max-height: calc(100vh - 40px);
+          overflow-y: auto;
+          position: relative;
+          background: #ffffff;
+          border: 1px solid rgba(217, 107, 39, 0.22);
+          border-radius: 24px;
+          padding: 34px;
+          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+        }
+
+        .admin-close {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: 38px;
+          height: 38px;
+          border: 0;
+          border-radius: 50%;
+          background: #eef3f8;
+          color: #061A30;
+          font-size: 20px;
+          cursor: pointer;
+        }
+
+        .admin-close:hover {
+          background: #D96B27;
+          color: #ffffff;
+        }
+
+        .admin-brand {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 24px;
+        }
+
+        .admin-brand-icon {
+          width: 54px;
+          height: 54px;
+          flex: 0 0 54px;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          background: #D96B27 !important;
+          border: 0 !important;
+          color: #ffffff !important;
+          font-size: 25px;
+          font-weight: 900;
+          font-weight: 900;
+          box-shadow: 0 8px 20px rgba(217, 107, 39, 0.25);
+        }
+
+        .admin-kicker {
+          color: #D96B27;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          margin-bottom: 5px;
+        }
+
+        .admin-brand-title {
+          color: #061A30;
+          font-size: 16px;
+          font-weight: 800;
+        }
+
+        .admin-modal h2 {
+          margin: 0;
+          color: #061A30;
+          font-size: 30px;
+          line-height: 1.15;
+        }
+
+        .admin-subtitle {
+          margin: 10px 0 25px;
+          color: #64748b;
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .admin-field {
+          margin-bottom: 17px;
+        }
+
+        .admin-field label {
+          display: block;
+          margin-bottom: 7px;
+          color: #24364d;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .admin-input-wrap {
+          position: relative;
+        }
+
+        .admin-input,
+        .admin-select {
+          width: 100%;
+          min-height: 48px;
+          border: 1px solid #d7e0e9;
+          border-radius: 10px;
+          outline: none;
+          background: #f8fafc;
+          color: #17243b;
+          padding: 12px 14px;
+          transition: 0.2s;
+        }
+
+        .admin-input:focus,
+        .admin-select:focus {
+          border-color: #D96B27;
+          background: #ffffff;
+          box-shadow: 0 0 0 3px rgba(217, 107, 39, 0.11);
+        }
+
+        .admin-input[type="password"],
+        .admin-input.has-eye {
+          padding-right: 48px;
+        }
+
+        .admin-eye {
+          position: absolute;
+          top: 50%;
+          right: 8px;
+          transform: translateY(-50%);
+          width: 38px;
+          height: 38px;
+          border: 0;
+          background: transparent;
+          color: #52677d;
+          cursor: pointer;
+          border-radius: 8px;
+        }
+
+        .admin-eye:hover {
+          background: #eef3f8;
+          color: #D96B27;
+        }
+
+        .admin-options {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 15px;
+          margin: 4px 0 22px;
+        }
+
+        .remember-device {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #5d6f82;
+          font-size: 13px;
+          cursor: pointer;
+        }
+
+        .remember-device input {
+          width: 16px;
+          height: 16px;
+          accent-color: #D96B27;
+        }
+
+        .forgot-password {
+          border: 0;
+          background: transparent;
+          color: #D96B27;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+          padding: 4px 0;
+        }
+
+        .forgot-password:hover {
+          color: #B9541E;
+          text-decoration: underline;
+        }
+
+        .admin-login-submit {
+          width: 100%;
+          min-height: 50px;
+          border: 0;
+          border-radius: 10px;
+          background: #D96B27;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 900;
+          letter-spacing: 1px;
+          cursor: pointer;
+          box-shadow: 0 10px 22px rgba(217, 107, 39, 0.25);
+          transition: 0.25s;
+        }
+
+        .admin-login-submit:hover {
+          background: #B9541E;
+          transform: translateY(-2px);
+        }
+
+        .admin-security-note {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          margin-top: 17px;
+          color: #718096;
+          font-size: 11px;
+          text-align: center;
+        }
+
+        /* =========================
            MOBILE
         ========================= */
 
@@ -2147,6 +2845,18 @@ export default function App() {
             color: #E18443;
           }
 
+          .admin-nav-button {
+            text-align: left !important;
+            padding: 12px 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+          }
+
+          .admin-nav-button:hover {
+            background: transparent !important;
+            transform: none;
+          }
+
           .nav-quote {
             text-align: center !important;
           }
@@ -2204,6 +2914,50 @@ export default function App() {
         }
 
         @media (max-width: 600px) {
+          .hero h1 {
+            white-space: normal;
+          }
+
+          .hero-extra-matter {
+            margin: 18px 0 20px;
+          }
+
+          .hero-extra-intro {
+            padding: 18px;
+          }
+
+          .hero-extra-intro h3 {
+            font-size: 20px;
+          }
+
+          .hero-extra-intro p {
+            font-size: 13px;
+            line-height: 1.6;
+          }
+
+          .hero-extra-points {
+            grid-template-columns: 1fr;
+          }
+
+          .hero-extra-point {
+            min-height: auto;
+          }
+
+          .hero-bottom-matter {
+            grid-template-columns: 1fr;
+          }
+
+          .hero-bottom-matter > div {
+            border-right: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 9px 4px;
+          }
+
+          .hero-bottom-matter > div:last-child {
+            border-bottom: 0;
+          }
+
+
 
           .container,
           .nav,
@@ -2267,8 +3021,26 @@ export default function App() {
             padding: 18px;
           }
 
+          .hero-action-contact-row {
+            grid-template-columns: 1fr;
+            gap: 14px;
+          }
+
+          .hero-contact {
+            width: 100%;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+          }
+
+          .hero-contact-item {
+            white-space: normal;
+          }
+
           .hero-actions {
+            width: 100%;
             align-items: stretch;
+            flex-wrap: wrap;
+            min-width: 0;
           }
 
           .hero-actions .btn {
@@ -2277,10 +3049,6 @@ export default function App() {
 
           .home-location-button {
             width: 100%;
-          }
-
-          .hero-contact {
-            gap: 18px;
           }
 
         }
@@ -2352,6 +3120,31 @@ export default function App() {
 
         }
 
+        /* ================= PAGE TIGHTENING ONLY ================= */
+        .section { padding: 22px 0; }
+        .section-heading { margin-bottom: 14px; }
+        .section-heading p { margin-top: 7px; line-height: 1.6; }
+        .footer { padding: 22px 0 14px; }
+        .footer-grid { gap: 20px; padding-bottom: 14px; }
+        .footer h3 { margin-bottom: 9px; }
+        .footer p { line-height: 1.55; }
+        .footer-links { gap: 7px; }
+        .footer-bottom { padding-top: 10px; }
+        .sa-services-page { min-height: auto; padding: 28px 20px 36px; }
+        .sa-heading { margin-bottom: 22px; }
+        .sa-cities-grid { gap: 18px; }
+        .sa-city-card { min-height: 140px; }
+        .sa-location-content-grid { gap: 20px; margin-top: 20px; }
+        .sa-location-section { margin-bottom: 20px; padding: 22px; }
+        .sa-services-list-section { margin-top: 20px; padding: 24px; }
+        @media (max-width: 850px) { .section { padding: 20px 0; } }
+        @media (max-width: 600px) {
+          .section { padding: 18px 0; }
+          .sa-services-page { padding: 22px 16px 28px; }
+          .sa-location-section { padding: 18px; }
+          .sa-services-list-section { padding: 20px; }
+        }
+
         /* ================= SERVICE AREAS ONLY ================= */
         .home-location-button {
           min-width: 165px;
@@ -2374,860 +3167,1129 @@ export default function App() {
 
         .sa-services-page {
           min-height: 100vh;
-          padding: 26px 20px 32px;
-          background: #061A30;
+          padding: 42px 20px 55px;
+          background: #fffaf4;
         }
 
         .sa-services-container {
-          width: min(1240px, 100%);
+          width: min(1180px, 100%);
           margin: 0 auto;
         }
 
         .sa-heading {
-          width: min(860px, 100%);
-          margin: 0 auto 14px;
-          text-align: center;
+          width: 100%;
+          margin: 0 0 34px;
+          text-align: left;
         }
 
         .sa-badge {
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
           padding: 8px 17px;
-          margin-bottom: 12px;
+          margin-bottom: 0;
           border-radius: 50px;
-          background: #24170f;
-          color: #f2c66d;
-          font-size: 12px;
+          background: #fff0e3;
+          color: #e87516;
+          font-size: 15px;
           font-weight: 800;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
+          letter-spacing: 0;
         }
 
         .sa-heading h1 {
           margin: 0;
-          color: #ffffff;
+          color: #10294b;
           font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-          font-size: clamp(34px, 5vw, 56px);
-          line-height: 1.08;
+            Inter,
+            Arial,
+            Helvetica,
+            sans-serif;
+          font-size: 32px;
+          line-height: 1.2;
+          font-weight: 800;
         }
 
         .sa-heading p {
-          width: min(760px, 100%);
-          margin: 9px auto 0;
-          color: #f7fbff;
-          font-size: 15px;
-          font-weight: 600;
-          line-height: 1.75;
-          text-align: center;
-          text-shadow: 0 1px 8px rgba(0, 0, 0, 0.28);
-        }
-
-        .hero-main-matter {
-          max-width: 720px;
-          line-height: 1.9 !important;
+          width: 100%;
+          margin: 0 0 20px;
+          color: #5c708d;
+          font-size: 20px;
+          font-weight: 400;
+          line-height: 1.5;
           text-align: left;
         }
 
         .sa-location-access {
-          width: min(760px, 100%);
-          margin: 0 auto 22px;
-          text-align: center;
-        }
-
-        .sa-location-button {
-          border: 0;
-          border-radius: 12px;
-          padding: 12px 20px;
-          background: #0B2A4A;
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 800;
-          cursor: pointer;
-          box-shadow: 0 8px 20px rgba(11, 42, 74, 0.18);
-          transition: 0.25s ease;
-        }
-
-        .sa-location-button:hover {
-          background: #061A30;
-          transform: translateY(-2px);
-        }
-
-        .sa-location-message {
-          margin-top: 10px;
-          color: #6d5d50;
-          font-size: 13px;
-          line-height: 1.5;
-        }
-
-        .sa-current-location {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-wrap: wrap;
-          gap: 8px 14px;
-          margin-top: 10px;
-          padding: 10px 14px;
-          border: 1px solid #dfc9a6;
-          border-radius: 10px;
-          background: #fffdf9;
-          color: #66584d;
-          font-size: 12px;
-          line-height: 1.5;
-        }
-
-        .sa-current-location button {
-          border: 0;
-          background: transparent;
-          color: #9f6b24;
-          font-size: 12px;
-          font-weight: 800;
-          cursor: pointer;
-          padding: 0;
-        }
-
-        .sa-current-location button:hover {
-          color: #24170f;
-          text-decoration: underline;
+          display: none;
         }
 
         .sa-search-area {
-          width: min(760px, 100%);
-          margin: 0 auto 20px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 0 0 28px;
+          width: 100%;
         }
 
-        .sa-search-wrapper {
+        .sa-search-box {
           position: relative;
+          flex: 1;
         }
 
         .sa-search-input {
           width: 100%;
-          height: 62px;
-          padding: 0 60px 0 22px;
-
-          border: 2px solid #dfc9a6;
-          border-radius: 16px;
+          box-sizing: border-box;
+          min-height: 58px;
+          padding: 0 20px 0 52px;
+          border: 1px solid #dfe4ea;
+          border-radius: 18px;
+          background: #ffffff;
+          color: #10294b;
+          font-family: Inter, Arial, Helvetica, sans-serif;
+          font-size: 17px;
           outline: none;
-
-          background: #fffdf9;
-          color: #24170f;
-
-          font-size: 16px;
-
-          box-shadow:
-            0 12px 30px
-            rgba(36, 23, 15, 0.08);
-
-          transition: 0.25s ease;
-        }
-
-        .sa-search-input::placeholder {
-          color: #9a8a7b;
+          box-shadow: 0 8px 22px rgba(23, 55, 95, 0.06);
         }
 
         .sa-search-input:focus {
-          border-color: #c8953f;
-
-          box-shadow:
-            0 15px 38px
-            rgba(181, 128, 45, 0.18);
+          border-color: #D96B27;
+          box-shadow: 0 10px 26px rgba(217, 107, 39, 0.12);
         }
 
         .sa-search-icon {
           position: absolute;
-          right: 20px;
           top: 50%;
-
-          transform:
-            translateY(-50%);
-
-          font-size: 22px;
+          left: 18px;
+          transform: translateY(-50%);
+          color: #74849a;
+          font-size: 21px;
           pointer-events: none;
         }
 
-        .sa-result-count {
-          margin-top: 12px;
-          text-align: center;
+        .sa-add-location-button {
+          min-height: 58px;
+          padding: 0 20px;
+          border: 0;
+          border-radius: 18px;
+          background: #D96B27;
+          color: #ffffff;
+          font-family: Inter, Arial, Helvetica, sans-serif;
+          font-size: 16px;
+          font-weight: 800;
+          cursor: pointer;
+          white-space: nowrap;
+          box-shadow: 0 9px 20px rgba(217, 107, 39, 0.18);
+        }
 
-          color: #7c6c5e;
+        .sa-add-location-button:hover {
+          transform: translateY(-2px);
+          background: #c65e20;
+        }
+
+        .sa-search-count {
+          margin: -13px 0 24px;
+          color: #7a899b;
           font-size: 14px;
+          line-height: 1.4;
+        }
+
+        .sa-add-location-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 3000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: rgba(6, 26, 48, 0.72);
+          backdrop-filter: blur(6px);
+        }
+
+        .sa-add-location-modal {
+          width: min(520px, 100%);
+          max-height: calc(100vh - 40px);
+          overflow-y: auto;
+          padding: 30px;
+          border-radius: 26px;
+          background: #ffffff;
+          box-shadow: 0 25px 70px rgba(6, 26, 48, 0.28);
+        }
+
+        .sa-add-location-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 18px;
+          margin-bottom: 24px;
+        }
+
+        .sa-add-location-header h2 {
+          margin: 0 0 7px;
+          color: #10294b;
+          font-size: 27px;
+          line-height: 1.2;
+        }
+
+        .sa-add-location-header p {
+          margin: 0;
+          color: #708198;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .sa-add-location-close {
+          width: 40px;
+          height: 40px;
+          flex: 0 0 40px;
+          border: 0;
+          border-radius: 50%;
+          background: #f0f3f6;
+          color: #10294b;
+          font-size: 25px;
+          cursor: pointer;
+        }
+
+        .sa-add-location-form {
+          display: grid;
+          gap: 16px;
+        }
+
+        .sa-form-field {
+          display: grid;
+          gap: 7px;
+        }
+
+        .sa-form-field label {
+          color: #193b67;
+          font-size: 14px;
+          font-weight: 800;
+        }
+
+        .sa-form-field input {
+          width: 100%;
+          box-sizing: border-box;
+          min-height: 50px;
+          padding: 0 14px;
+          border: 1px solid #dfe4ea;
+          border-radius: 13px;
+          color: #10294b;
+          font-family: Inter, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          outline: none;
+        }
+
+        .sa-form-field input:focus {
+          border-color: #D96B27;
+        }
+
+        .sa-add-location-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 7px;
+        }
+
+        .sa-add-cancel,
+        .sa-add-submit {
+          min-height: 48px;
+          padding: 0 18px;
+          border-radius: 13px;
+          font-family: Inter, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .sa-add-cancel {
+          border: 1px solid #dfe4ea;
+          background: #ffffff;
+          color: #193b67;
+        }
+
+        .sa-add-submit {
+          border: 0;
+          background: #D96B27;
+          color: #ffffff;
         }
 
         .sa-cities-grid {
+          width: 100%;
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 18px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 22px;
           align-items: stretch;
         }
 
         .sa-city-card {
           position: relative;
-          min-height: 250px;
+          width: 100%;
+          min-height: 158px;
           display: flex;
           flex-direction: column;
-          padding: 19px;
-
-          border:
-            1px solid
-            #eadcc7;
-
-          border-radius: 20px;
-
-          background:
-            rgba(
-              255,
-              253,
-              249,
-              0.96
-            );
-
+          justify-content: center;
+          padding: 30px 32px;
+          border: 1px solid #e9e7e3;
+          border-radius: 27px;
+          background: #ffffff;
           cursor: pointer;
-
           box-shadow:
-            0 8px 25px
-            rgba(36, 23, 15, 0.07);
-
+            0 9px 25px rgba(23, 55, 95, 0.08);
           transition:
-            transform 0.28s ease,
-            box-shadow 0.28s ease,
-            border-color 0.28s ease;
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            border-color 0.25s ease;
+          text-align: left;
         }
 
         .sa-city-card:hover {
-          transform:
-            translateY(-7px);
-
-          border-color:
-            #d4a14c;
-
+          transform: translateY(-3px);
+          border-color: #d9dee5;
           box-shadow:
-            0 20px 40px
-            rgba(36, 23, 15, 0.14);
+            0 15px 32px rgba(23, 55, 95, 0.13);
         }
 
         .sa-city-card::after {
-          content: "";
-
-          position: absolute;
-
-          left: 0;
-          right: 0;
-          bottom: 0;
-
-          height: 3px;
-
-          border-radius:
-            0 0 20px 20px;
-
-          background:
-            linear-gradient(
-              90deg,
-              #9f6b24,
-              #e3b65e
-            );
-
-          transform:
-            scaleX(0);
-
-          transform-origin: left;
-
-          transition:
-            transform 0.3s ease;
-        }
-
-        .sa-city-card:hover::after {
-          transform:
-            scaleX(1);
+          display: none;
         }
 
         .sa-city-icon {
-          width: 48px;
-          height: 48px;
-
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          margin-bottom: 12px;
-
-          border-radius: 50%;
-
-          background: #24170f;
-
-          color: #f2c66d;
-
-          font-size: 21px;
-
-          box-shadow:
-            0 8px 18px
-            rgba(36, 23, 15, 0.15);
+          display: none;
         }
 
         .sa-city-card h2 {
-          margin: 0 0 8px;
-          min-height: 29px;
-
-          color: #24170f;
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-          font-size: 24px;
-        }
-
-        .sa-district {
-          margin: 0 0 10px;
-          min-height: 18px;
-
-          color: #79695b;
-
-          font-size: 13px;
-          font-weight: 600;
-        }
-
-        .sa-location {
           margin: 0;
+          padding-right: 42px;
+          color: #10294b;
+          font-family:
+            Inter,
+            Arial,
+            Helvetica,
+            sans-serif;
+          font-size: 28px;
+          line-height: 1.25;
+          font-weight: 800;
+          letter-spacing: -0.4px;
+        }
 
-          color: #6b5c4e;
-
-          font-size: 13px;
-
-          line-height: 1.5;
-
-          min-height: 39px;
+        .sa-district,
+        .sa-location {
+          display: none;
         }
 
         .sa-card-divider {
-          height: 1px;
-
-          margin:
-            17px 0 14px;
-
-          background:
-            #eee2d0;
+          display: none;
         }
 
         .sa-starting-row {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-
-          gap: 10px;
+          gap: 14px;
+          margin-top: 19px;
+          min-height: 32px;
         }
 
         .sa-starting-label {
-          color: #7b6b5d;
-          font-size: 12px;
+          display: none;
         }
 
         .sa-starting-price {
-          color: #b67720;
-
-          font-size: 17px;
-
-          font-weight: 800;
+          display: none;
         }
 
-        .sa-view-price {
-          margin-top: auto;
-          padding-top: 14px;
+        .sa-city-card::before {
+          content: "↗";
+          position: absolute;
+          top: 31px;
+          right: 32px;
+          color: #9aa8b9;
+          font-size: 28px;
+          line-height: 1;
+          font-weight: 300;
+        }
 
-          color: #24170f;
+        .sa-city-card .sa-starting-row::before {
+          content: "";
+          display: block;
+        }
 
-          font-size: 13px;
+        .sa-city-card .sa-view-price {
+          position: absolute;
+          left: 32px;
+          bottom: 30px;
+          display: none;
+        }
 
-          font-weight: 800;
+        .sa-branch-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 13px;
+          border-radius: 18px;
+          background: #e1e9f4;
+          color: #193b67;
+          font-size: 17px;
+          line-height: 1;
+          font-weight: 600;
+        }
+
+        .sa-areas-covered {
+          color: #8a99ad;
+          font-size: 17px;
+          line-height: 1.4;
         }
 
         .sa-no-results {
-          grid-column: 1 / -1;
-
-          padding: 55px 20px;
-
+          padding: 35px;
+          background: #ffffff;
+          border: 1px solid #e9e7e3;
+          border-radius: 25px;
           text-align: center;
-
-          border:
-            1px solid
-            #eadcc7;
-
-          border-radius: 20px;
-
-          background: #fffdf9;
+          color: #5c708d;
         }
 
-        .sa-no-results-icon {
-          font-size: 42px;
-          margin-bottom: 12px;
+        @media (max-width: 980px) and (min-width: 621px) {
+          .sa-cities-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+          }
         }
 
-        .sa-no-results h3 {
-          margin: 0 0 8px;
+        @media (max-width: 620px) {
+          .sa-cities-grid {
+            grid-template-columns: 1fr;
+          }
 
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
+          .sa-search-area {
+            flex-direction: column;
+            align-items: stretch;
+          }
 
-          font-size: 24px;
+          .sa-add-location-button {
+            width: 100%;
+          }
+
+          .sa-add-location-modal {
+            padding: 24px 20px;
+            border-radius: 22px;
+          }
+
+          .sa-add-location-actions {
+            flex-direction: column-reverse;
+          }
+
+          .sa-add-cancel,
+          .sa-add-submit {
+            width: 100%;
+          }
         }
 
-        .sa-no-results p {
-          margin: 0;
-
-          color: #7b6b5d;
-        }
-
-        /* POPUP */
-
-        .sa-overlay {
-          position: fixed;
-
-          inset: 0;
-
-          z-index: 9999;
-
-          display: flex;
-
+        .sa-delete-location-button {
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-
-          padding: 18px;
-
-          background:
-            rgba(
-              20,
-              13,
-              8,
-              0.74
-            );
-
-          backdrop-filter:
-            blur(6px);
-        }
-
-        .sa-modal {
-          width:
-            min(720px, 100%);
-
-          max-height:
-            92vh;
-
-          overflow-y: auto;
-
-          border-radius: 24px;
-
-          background:
-            #fffdf9;
-
-          box-shadow:
-            0 35px 90px
-            rgba(0, 0, 0, 0.38);
-
-          animation:
-            saModalShow
-            0.28s
-            ease;
-        }
-
-        @keyframes saModalShow {
-          from {
-            opacity: 0;
-            transform:
-              translateY(25px)
-              scale(0.96);
-          }
-
-          to {
-            opacity: 1;
-            transform:
-              translateY(0)
-              scale(1);
-          }
-        }
-
-        .sa-modal-header {
-          display: flex;
-
-          justify-content:
-            space-between;
-
-          align-items:
-            flex-start;
-
-          gap: 18px;
-
-          padding: 27px 28px;
-
-          background:
-            #24170f;
-
-          color: white;
-        }
-
-        .sa-modal-header h2 {
-          margin: 0 0 7px;
-
-          color:
-            #f2c66d;
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-          font-size: 32px;
-        }
-
-        .sa-modal-header p {
-          margin: 0;
-
-          color:
-            #e5d5c2;
-
-          font-size: 14px;
-        }
-
-        .sa-close-button {
-          width: 40px;
-          height: 40px;
-
-          flex-shrink: 0;
-
+          width: fit-content;
+          margin-top: 12px;
+          padding: 8px 12px;
           border: 0;
-          border-radius: 50%;
-
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.12
-            );
-
-          color: white;
-
+          border-radius: 10px;
+          background: #ffe7e3;
+          color: #c83d2f;
+          font-family: inherit;
+          font-size: 13px;
+          line-height: 1;
+          font-weight: 800;
           cursor: pointer;
-
-          font-size: 23px;
-
-          transition:
-            0.2s ease;
+          position: relative;
+          z-index: 6;
         }
 
-        .sa-close-button:hover {
-          background:
-            rgba(
-              255,
-              255,
-              255,
-              0.24
-            );
-
-          transform:
-            rotate(90deg);
+        .sa-delete-location-button:hover {
+          background: #ffd5cf;
         }
 
-        .sa-modal-body {
-          padding: 26px 28px 30px;
+        .sa-delete-location-button:active {
+          transform: translateY(1px);
         }
 
-        .sa-location-box {
+        .sa-city-card:focus-visible {
+          outline: 3px solid rgba(217, 107, 39, 0.35);
+          outline-offset: 3px;
+        }
+
+        /* Mobile service-area sizing to match the reference screenshot. */
+        @media (max-width: 620px) {
+          .sa-services-page {
+            padding: 42px 27px 55px;
+          }
+
+          .sa-services-container {
+            width: 100%;
+          }
+
+          .sa-heading {
+            margin-bottom: 34px;
+          }
+
+          .sa-heading h1 {
+            font-size: 29px;
+          }
+
+          .sa-heading p {
+            font-size: 22px;
+          }
+
+          .sa-cities-grid {
+            gap: 27px;
+          }
+
+          .sa-city-card {
+            min-height: 158px;
+            padding: 36px 32px;
+            border-radius: 27px;
+          }
+
+          .sa-city-card h2 {
+            font-size: 27px;
+          }
+
+          .sa-city-card::before {
+            top: 37px;
+            right: 31px;
+            font-size: 27px;
+          }
+
+          .sa-starting-row {
+            margin-top: 19px;
+          }
+
+          .sa-branch-badge {
+            font-size: 16px;
+          }
+
+          .sa-areas-covered {
+            font-size: 16px;
+          }
+        }
+
+        @media (min-width: 621px) {
+          .sa-services-page {
+            padding-left: 32px;
+            padding-right: 32px;
+          }
+        }
+
+        /* ===== SERVICE AREA CITY LIST + LOCATION PAGE ===== */
+        .sa-eyebrow {
+          margin-bottom: 10px;
+          color: #D96B27;
+          font-size: 12px;
+          font-weight: 900;
+          letter-spacing: 1.7px;
+        }
+
+        .sa-heading h1 {
+          margin: 0 0 12px;
+          color: #10294b;
+          font-size: 36px;
+          font-weight: 850;
+        }
+
+        .sa-heading p {
+          max-width: 760px;
+          margin: 0;
+          color: #60718a;
+          font-size: 17px;
+          line-height: 1.65;
+        }
+
+        .sa-cities-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 18px;
+        }
+
+        .sa-city-card {
+          position: relative;
+          min-height: 150px;
+          width: 100%;
+          padding: 24px;
+          border: 1px solid #e1e7ee;
+          border-radius: 20px;
+          background: #ffffff;
+          box-shadow: 0 8px 24px rgba(20, 48, 80, 0.07);
+          cursor: pointer;
+          text-align: left;
           display: flex;
-
-          align-items:
-            flex-start;
-
-          gap: 14px;
-
-          padding: 17px;
-
-          margin-bottom: 17px;
-
-          border-radius: 15px;
-
-          background:
-            #f8f0e2;
-
-          border:
-            1px solid
-            #eadcc5;
+          align-items: flex-start;
+          gap: 15px;
+          transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+          font: inherit;
         }
 
-        .sa-location-icon {
+        .sa-city-card:hover {
+          transform: translateY(-4px);
+          border-color: #D96B27;
+          box-shadow: 0 15px 30px rgba(20, 48, 80, 0.12);
+        }
+
+        .sa-city-icon {
           width: 43px;
           height: 43px;
+          flex: 0 0 43px;
+          display: grid;
+          place-items: center;
+          border-radius: 13px;
+          background: #fff0e5;
+          font-size: 19px;
+        }
 
-          min-width: 43px;
-
+        .sa-city-card-content {
           display: flex;
+          flex-direction: column;
+          gap: 7px;
+          padding-right: 25px;
+        }
 
-          align-items:
-            center;
-
-          justify-content:
-            center;
-
-          border-radius: 50%;
-
-          background:
-            #24170f;
-
+        .sa-city-card-title {
+          color: #10294b;
           font-size: 20px;
+          line-height: 1.2;
+          font-weight: 850;
         }
 
-        .sa-location-title {
-          margin-bottom: 5px;
-
-          color:
-            #24170f;
-
-          font-size: 14px;
-
-          font-weight: 800;
+        .sa-city-card-subtitle {
+          color: #8290a2;
+          font-size: 13px;
+          font-weight: 600;
         }
 
-        .sa-location-text {
-          color:
-            #66584d;
-
-          font-size: 14px;
-
-          line-height: 1.5;
+        .sa-city-arrow {
+          position: absolute;
+          top: 22px;
+          right: 22px;
+          color: #9aa8b9;
+          font-size: 23px;
         }
 
-        .sa-map-button {
-          width: 100%;
-          margin: 14px 0 18px;
-          padding: 13px 16px;
+        .sa-location-page {
+          min-height: 100vh;
+          padding: 32px 20px 65px;
+          background: #f7f9fc;
+        }
+
+        .sa-location-container {
+          width: min(1180px, 100%);
+          margin: 0 auto;
+        }
+
+        .sa-back-button {
           border: 0;
-          border-radius: 12px;
-          background: #061A30;
-          color: #ffffff;
+          background: transparent;
+          color: #D96B27;
           font-size: 14px;
-          font-weight: 700;
+          font-weight: 800;
           cursor: pointer;
-          transition: transform 0.2s ease, opacity 0.2s ease;
+          padding: 4px 0 18px;
         }
 
-        .sa-map-button:hover {
-          transform: translateY(-1px);
-          opacity: 0.92;
-        }
-
-        .sa-distance-box {
-          padding: 14px 16px;
-
-          margin-bottom: 18px;
-
-          border-radius: 12px;
-
-          background:
-            #fff8eb;
-
-          border:
-            1px solid
-            #eadcc5;
-
-          color:
-            #66584d;
-
-          font-size: 14px;
-        }
-
-        .sa-distance-box strong {
-          color:
-            #24170f;
-        }
-
-        .sa-price-heading {
-          margin:
-            0 0 13px;
-
-          color:
-            #24170f;
-
-          font-family:
-            Georgia,
-            "Times New Roman",
-            serif;
-
-          font-size: 22px;
-        }
-
-        .sa-price-table {
-          width: 100%;
-
-          border-collapse:
-            collapse;
-
-          overflow: hidden;
-
-          border-radius:
-            13px;
-        }
-
-        .sa-price-table th {
-          padding: 15px;
-
-          background:
-            #24170f;
-
-          color:
-            #f2c66d;
-
-          text-align: left;
-
+        .sa-breadcrumb {
+          margin-bottom: 22px;
+          color: #7b8898;
           font-size: 13px;
         }
 
-        .sa-price-table th:last-child {
-          text-align:
-            right;
+        .sa-breadcrumb span {
+          margin: 0 8px;
+          color: #b5bec9;
         }
 
-        .sa-price-table td {
-          padding: 15px;
-
-          border-bottom:
-            1px solid
-            #eadcc5;
-
-          color:
-            #4d4036;
-
-          font-size: 14px;
+        .sa-location-hero {
+          display: grid;
+          grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+          gap: 30px;
+          padding: 40px;
+          border-radius: 26px;
+          background: linear-gradient(135deg, #061A30, #0B2A4A);
+          color: #ffffff;
+          box-shadow: 0 18px 40px rgba(6, 26, 48, .18);
         }
 
-        .sa-price-table tr:last-child td {
+        .sa-location-state {
+          display: inline-block;
+          margin-bottom: 12px;
+          color: #E18443;
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+        }
+
+        .sa-location-hero h1 {
+          margin: 0 0 17px;
+          color: #ffffff;
+          font-size: clamp(34px, 5vw, 54px);
+          line-height: 1.06;
+          letter-spacing: -1.2px;
+        }
+
+        .sa-location-lead {
+          margin: 0;
+          max-width: 760px;
+          color: rgba(255,255,255,.86);
+          font-size: 16px;
+          line-height: 1.7;
+        }
+
+        .sa-location-lead strong {
+          color: #ffb16f;
+        }
+
+        .sa-location-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-top: 26px;
+        }
+
+        .btn-dark-outline {
+          border: 1px solid rgba(255,255,255,.35) !important;
+          background: transparent !important;
+          color: #ffffff !important;
+        }
+
+        .sa-location-summary {
+          align-self: stretch;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 1px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 19px;
+          background: rgba(255,255,255,.06);
+        }
+
+        .sa-location-summary div {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding: 17px 20px;
+          border-bottom: 1px solid rgba(255,255,255,.09);
+        }
+
+        .sa-location-summary div:last-child {
           border-bottom: 0;
         }
 
-        .sa-price-table td:last-child {
-          text-align:
-            right;
-
-          color:
-            #b67720;
-
-          font-weight:
-            800;
+        .sa-location-summary span {
+          color: rgba(255,255,255,.62);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
-        .sa-service-note {
-          margin-top: 18px;
+        .sa-location-summary strong {
+          color: #ffffff;
+          font-size: 15px;
+          line-height: 1.4;
+        }
 
-          padding: 14px;
+        .sa-location-content-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(360px, .8fr);
+          gap: 28px;
+          margin-top: 28px;
+        }
 
+        .sa-location-section {
+          margin-bottom: 28px;
+          padding: 28px;
+          border: 1px solid #e4e9ef;
+          border-radius: 20px;
+          background: #ffffff;
+        }
+
+        .sa-location-section h2 {
+          margin: 0 0 12px;
+          color: #10294b;
+          font-size: 29px;
+          line-height: 1.2;
+        }
+
+        .sa-location-section h3 {
+          margin: 0 0 12px;
+          color: #10294b;
+          font-size: 20px;
+        }
+
+        .sa-location-section p {
+          margin: 0;
+          color: #60718a;
+          font-size: 15px;
+          line-height: 1.75;
+        }
+
+        .sa-location-section p {
+          max-width: 760px;
+          text-align: left;
+          white-space: normal;
+        }
+
+        .sa-location-lead {
+          max-width: 680px;
+        }
+
+        .sa-location-content-grid > div:first-child {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .sa-location-section + .sa-location-section {
+          margin-top: 0;
+        }
+
+        .sa-location-section h2,
+        .sa-location-section h3,
+        .sa-location-section p {
+          text-align: left;
+        }
+
+        .sa-landmark-list {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+        }
+
+        .sa-landmark-item {
+          padding: 13px;
           border-radius: 12px;
-
-          background:
-            #24170f;
-
-          color:
-            #eadbc8;
-
+          background: #f4f7fa;
+          color: #40546b;
           font-size: 13px;
+          font-weight: 700;
+        }
 
+        .sa-challenge-card {
+          border-color: #f0d5c1;
+          background: #fff8f2;
+        }
+
+        .sa-testimonial {
+          position: relative;
+          padding: 30px;
+          border-radius: 20px;
+          background: #061A30;
+          color: #ffffff;
+        }
+
+        .sa-quote-mark {
+          color: #E18443;
+          font-family: Georgia, serif;
+          font-size: 55px;
+          line-height: .7;
+        }
+
+        .sa-testimonial p {
+          margin: 12px 0 17px;
+          color: rgba(255,255,255,.9);
+          font-size: 16px;
+          line-height: 1.7;
+        }
+
+        .sa-testimonial strong {
+          color: #ffb16f;
+          font-size: 13px;
+        }
+
+        .sa-location-map-card {
+          height: fit-content;
+          overflow: hidden;
+          border: 1px solid #e4e9ef;
+          border-radius: 20px;
+          background: #ffffff;
+          box-shadow: 0 10px 26px rgba(20,48,80,.06);
+        }
+
+        .sa-map-card-heading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 18px 20px;
+        }
+
+        .sa-map-card-heading div {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #10294b;
+        }
+
+        .sa-map-card-heading button {
+          border: 0;
+          background: transparent;
+          color: #D96B27;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .sa-map-visual {
+          position: relative;
+          min-height: 340px;
+          overflow: hidden;
+          background:
+            linear-gradient(90deg, rgba(255,255,255,.72) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255,.72) 1px, transparent 1px),
+            #e9eef3;
+          background-size: 42px 42px;
+        }
+
+        .sa-map-road {
+          position: absolute;
+          height: 13px;
+          border-radius: 999px;
+          background: #ffffff;
+          box-shadow: 0 0 0 2px rgba(180,190,200,.35);
+          transform-origin: center;
+        }
+
+        .sa-map-road.one {
+          width: 115%;
+          top: 31%;
+          left: -8%;
+          transform: rotate(-13deg);
+        }
+
+        .sa-map-road.two {
+          width: 105%;
+          top: 66%;
+          left: 2%;
+          transform: rotate(16deg);
+        }
+
+        .sa-map-road.three {
+          width: 72%;
+          top: 12%;
+          left: 17%;
+          transform: rotate(58deg);
+        }
+
+        .sa-map-road.four {
+          width: 66%;
+          top: 47%;
+          left: 23%;
+          transform: rotate(-62deg);
+        }
+
+        .sa-map-area {
+          position: absolute;
+          border-radius: 50%;
+          background: rgba(119, 180, 137, .26);
+          filter: blur(1px);
+        }
+
+        .sa-map-area.one {
+          width: 150px;
+          height: 150px;
+          top: 8%;
+          left: 8%;
+        }
+
+        .sa-map-area.two {
+          width: 180px;
+          height: 180px;
+          right: 8%;
+          bottom: 4%;
+          background: rgba(102, 164, 202, .22);
+        }
+
+        .sa-map-marker {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 24px;
+          height: 24px;
+          border: 6px solid #ffffff;
+          border-radius: 50%;
+          background: #D96B27;
+          box-shadow: 0 0 0 7px rgba(217,107,39,.18), 0 8px 20px rgba(6,26,48,.22);
+          transform: translate(-50%, -50%);
+          z-index: 3;
+        }
+
+        .sa-map-label {
+          position: absolute;
+          left: 50%;
+          bottom: 25px;
+          transform: translateX(-50%);
+          z-index: 4;
+          padding: 9px 14px;
+          border-radius: 10px;
+          background: rgba(6,26,48,.92);
+          color: #ffffff;
+          font-size: 12px;
+          font-weight: 800;
+          white-space: nowrap;
+          box-shadow: 0 8px 18px rgba(6,26,48,.18);
+        }
+
+        .sa-location-map-card iframe {
+          display: none;
+        }
+
+        .sa-location-map-card p {
+          margin: 0;
+          padding: 15px 20px 19px;
+          color: #6b7a8d;
+          font-size: 12px;
           line-height: 1.6;
         }
 
-        .sa-service-note strong {
-          color:
-            #f2c66d;
+        .sa-services-list-section {
+          margin-top: 28px;
+          padding: 30px;
+          border-radius: 22px;
+          background: #ffffff;
+          border: 1px solid #e4e9ef;
         }
 
-        .sa-price-note {
-          margin:
-            17px 0 0;
+        .sa-services-list-section h2 {
+          margin: 0 0 22px;
+          color: #10294b;
+          font-size: 30px;
+        }
 
-          color:
-            #89796a;
+        .sa-service-price-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
 
-          font-size: 12px;
+        .sa-service-price-card {
+          min-height: 92px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 16px;
+          border: 1px solid #e4e9ef;
+          border-radius: 15px;
+          background: #f9fbfd;
+        }
 
+        .sa-service-price-card span {
+          color: #52657b;
+          font-size: 13px;
+          line-height: 1.35;
+          font-weight: 700;
+        }
+
+        .sa-service-price-card strong {
+          color: #D96B27;
+          font-size: 16px;
+        }
+
+        .sa-location-bottom-cta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 25px;
+          margin-top: 28px;
+          padding: 30px;
+          border-radius: 22px;
+          background: #fff0e5;
+        }
+
+        .sa-location-bottom-cta h2 {
+          margin: 0 0 8px;
+          color: #10294b;
+          font-size: 25px;
+        }
+
+        .sa-location-bottom-cta p {
+          margin: 0;
+          color: #60718a;
+          font-size: 14px;
           line-height: 1.6;
         }
 
         @media (max-width: 950px) {
           .sa-cities-grid {
-            grid-template-columns:
-              repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .sa-location-hero,
+          .sa-location-content-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .sa-service-price-grid {
+            grid-template-columns: repeat(2, 1fr);
           }
         }
 
         @media (max-width: 620px) {
-          .sa-services-page {
-            padding:
-              32px
-              14px
-              42px;
-          }
-
-          .sa-heading {
-            margin-bottom: 25px;
-          }
-
-          .sa-heading h1 {
-            font-size: 34px;
-          }
-
-          .sa-heading p {
-            font-size: 14px;
+          .sa-services-page,
+          .sa-location-page {
+            padding-left: 14px;
+            padding-right: 14px;
           }
 
           .sa-cities-grid {
             grid-template-columns: 1fr;
-            gap: 15px;
+            gap: 13px;
           }
 
-          .sa-city-card {
-            padding: 20px;
+          .sa-heading h1 {
+            font-size: 30px;
           }
 
-          .sa-location-access {
-            margin-bottom: 18px;
+          .sa-location-hero {
+            padding: 25px 20px;
+            border-radius: 20px;
           }
 
-          .sa-location-button {
+          .sa-location-hero h1 {
+            font-size: 36px;
+          }
+
+          .sa-location-actions {
+            flex-direction: column;
+          }
+
+          .sa-location-actions .btn {
             width: 100%;
           }
 
-          .sa-current-location {
+          .sa-location-summary {
+            margin-top: 4px;
+          }
+
+          .sa-location-section,
+          .sa-services-list-section,
+          .sa-testimonial {
+            padding: 21px;
+          }
+
+          .sa-landmark-list,
+          .sa-service-price-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .sa-location-bottom-cta {
+            align-items: stretch;
+            flex-direction: column;
+            padding: 22px;
+          }
+
+          .sa-location-bottom-cta .btn {
+            width: 100%;
+          }
+
+          .sa-map-card-heading {
             align-items: flex-start;
             flex-direction: column;
-            text-align: left;
-          }
-
-          .sa-search-input {
-            height: 56px;
-          }
-
-          .sa-modal-header {
-            padding:
-              22px
-              20px;
-          }
-
-          .sa-modal-header h2 {
-            font-size: 27px;
-          }
-
-          .sa-modal-body {
-            padding:
-              20px;
-          }
-
-          .sa-price-table th,
-          .sa-price-table td {
-            padding:
-              12px 9px;
-          }
-
-          .sa-price-table {
-            font-size: 12px;
           }
         }
       `}</style>
@@ -3276,7 +4338,7 @@ export default function App() {
             >
 
               <div className="logo-icon">
-                📦
+                K
               </div>
 
               <div className="logo-text">
@@ -3367,6 +4429,14 @@ export default function App() {
               </button>
 
               <button
+                className="admin-nav-button"
+                type="button"
+                onClick={openAdminPortal}
+              >
+                Admin Login
+              </button>
+
+              <button
                 className="nav-quote"
                 onClick={() =>
                   setShowQuote(true)
@@ -3402,46 +4472,78 @@ export default function App() {
                 confidence.
               </span>
 
-              <br />
-
+              {" "}
               Settle with ease.
 
             </h1>
 
             <p className="blink-text hero-main-matter">
 
-              Professional packing and moving support.
-              <br />
-              Careful handling for homes and offices.
-              <br />
-              Reliable relocation assistance across Karimnagar and beyond.
+              Professional packing and moving support. Careful handling for homes and offices. Reliable relocation assistance across Karimnagar and beyond.
 
             </p>
 
-            <div className="hero-actions">
+            <div className="hero-extra-matter">
 
-              <button
-                className="btn btn-primary"
-                onClick={() =>
-                  setShowQuote(true)
-                }
-              >
-                📦 Get Free Quote
-              </button>
+              <div className="hero-extra-intro">
 
-              <button
-                className="btn btn-light"
-                onClick={openWhatsApp}
-              >
-                💬 WhatsApp Us
-              </button>
+                <div className="hero-extra-label">
+                  YOUR MOVE, PLANNED BETTER
+                </div>
 
-              <button
-                className="btn btn-light home-location-button"
-                onClick={getUserLocation}
-              >
-                📍 Use My Location
-              </button>
+                <h3>
+                  Complete Packing & Moving Support
+                </h3>
+
+                <p>
+                  Moving to a new home or office becomes easier when every stage is properly planned. Kiran Packers And Movers helps coordinate packing, loading, transportation, unloading and delivery according to your moving requirement.
+                </p>
+
+                <p>
+                  Whether you are shifting within Karimnagar, moving to a nearby city or planning an intercity relocation, our team provides practical moving assistance from pickup to destination.
+                </p>
+
+              </div>
+
+            </div>
+
+            <div className="hero-action-contact-row">
+
+              <div className="hero-contact">
+
+                <div className="hero-contact-item">
+                  <strong>Location</strong>
+                  <span>Mukarampura, Karimnagar</span>
+                </div>
+
+              </div>
+
+              <div className="hero-actions">
+
+                <button
+                  className="btn btn-primary"
+                  onClick={() =>
+                    setShowQuote(true)
+                  }
+                >
+                  📦 Get Free Quote
+                </button>
+
+                <button
+                  className="btn btn-light"
+                  onClick={openWhatsApp}
+                >
+                  💬 WhatsApp Us
+                </button>
+
+                <button
+                  className="btn btn-light home-location-button"
+                  onClick={getUserLocation}
+                >
+                  📍 Use My Location
+                </button>
+
+              </div>
 
             </div>
 
@@ -3461,42 +4563,6 @@ export default function App() {
               </div>
 
             )}
-
-            <div className="hero-contact">
-
-              <div className="hero-contact-item">
-
-                <strong>
-                  Location
-                </strong>
-
-                Mukarampura,
-                Karimnagar
-
-              </div>
-
-              <div className="hero-contact-item">
-
-                <strong>
-                  Call
-                </strong>
-
-                {company.phone}
-
-              </div>
-
-              <div className="hero-contact-item">
-
-                <strong>
-                  Support
-                </strong>
-
-                Local & Intercity
-                Moves
-
-              </div>
-
-            </div>
 
           </div>
 
@@ -3885,373 +4951,313 @@ export default function App() {
           className="section alt sa-areas-section"
         >
 
-          <div className="sa-services-page">
+          {!selectedCity ? (
+            <div className="sa-services-page">
 
-        <div className="sa-services-container">
+              <div className="sa-services-container">
 
-          {/* HEADER */}
+                <div className="sa-heading">
 
-          <div className="sa-heading">
+                  <div className="sa-eyebrow">
+                    SERVICE AREAS
+                  </div>
 
-            <span className="sa-badge">
-              📍 Our Service Areas
-            </span>
+                  <h1>
+                    40+ cities. One truck away.
+                  </h1>
 
-            <h1>
-              Packers & Movers
-              <br />
-              Service Areas
-            </h1>
+                  <p>
+                    We provide organised packing and moving support across Telangana and major cities beyond. Select a city to view its moving details.
+                  </p>
 
-            <p>
-              Find our Packers & Movers services in your city.
-              <br />
-              Search below to find your location quickly.
-              <br />
-              Click any city to view its location, service area and estimated moving prices.
-            </p>
+                </div>
+
+                <div className="sa-search-area">
+                  <div className="sa-search-box">
+                    <span className="sa-search-icon">⌕</span>
+                    <input
+                      type="search"
+                      className="sa-search-input"
+                      value={searchCity}
+                      onChange={(event) =>
+                        setSearchCity(event.target.value)
+                      }
+                      placeholder="Search your city"
+                      aria-label="Search your city"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    className="sa-add-location-button"
+                    onClick={() => setShowAddLocation(true)}
+                  >
+                    + Add New Location
+                  </button>
+                </div>
+
+                <div className="sa-search-count">
+                  Showing {filteredScreenshotServiceAreas.length + filteredCustomLocations.length} locations
+                </div>
+
+                <div className="sa-cities-grid">
+
+                  {[
+                    ...filteredScreenshotServiceAreas.map((area) => ({
+                      ...area,
+                      isCustom: false,
+                    })),
+                    ...filteredCustomLocations.map((area) => ({
+                      ...area,
+                      isCustom: true,
+                    })),
+                  ].map((area) => (
+
+                    <div
+                      key={`${area.city}-${area.isCustom ? "custom" : "default"}`}
+                      className="sa-city-card"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() =>
+                        setSelectedCity(getCityDetails(area))
+                      }
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setSelectedCity(getCityDetails(area));
+                        }
+                      }}
+                    >
+
+                      <span className="sa-city-icon">
+                        📍
+                      </span>
+
+                      <span className="sa-city-card-content">
+                        <span className="sa-city-card-title">
+                          {area.city}
+                        </span>
+
+                        <span className="sa-city-card-subtitle">
+                          Packers & Movers
+                        </span>
+
+                        {area.isCustom && (
+                          <button
+                            type="button"
+                            className="sa-delete-location-button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleDeleteCustomLocation(area.city);
+                            }}
+                          >
+                            🗑 Delete Location
+                          </button>
+                        )}
+                      </span>
+
+                      <span className="sa-city-arrow">
+                        ↗
+                      </span>
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+                {filteredScreenshotServiceAreas.length === 0 &&
+                  filteredCustomLocations.length === 0 && (
+                    <div className="sa-no-results">
+                      No city found for <strong>{searchCity}</strong>. Try another city name or add a new location.
+                    </div>
+                  )}
 
               </div>
 
-          {/* SEARCH */}
-
-          <div className="sa-search-area">
-
-            <div className="sa-search-wrapper">
-
-              <input
-                type="text"
-                className="sa-search-input"
-                value={searchCity}
-                onChange={(e) =>
-                  setSearchCity(e.target.value)
-                }
-                placeholder="Search city... e.g. Bhupalapally"
-              />
-
-              <span className="sa-search-icon">
-                🔍
-              </span>
-
             </div>
+          ) : (
+            <div className="sa-location-page">
 
-            <div className="sa-result-count">
+              <div className="sa-location-container">
 
-              {searchCity
-                ? `${filteredCities.length} ${
-                    filteredCities.length === 1
-                      ? "city"
-                      : "cities"
-                  } found`
-                : `${serviceAreas.length} service areas available`}
-
-            </div>
-
-          </div>
-
-          {/* CITIES */}
-
-          <div className="sa-cities-grid">
-
-            {filteredCities.length > 0 ? (
-
-              filteredCities.map((area) => (
-
-                <div
-                  key={area.city}
-                  className="sa-city-card"
-                  onClick={() =>
-                    setSelectedCity(area)
-                  }
+                <button
+                  type="button"
+                  className="sa-back-button"
+                  onClick={() => setSelectedCity(null)}
                 >
+                  ← Back to Service Areas
+                </button>
 
-                  <div className="sa-city-icon">
-                    📍
+                <div className="sa-breadcrumb">
+                  Home <span>/</span> Locations <span>/</span> {selectedCity.city}
+                </div>
+
+                <div className="sa-location-hero">
+
+                  <div className="sa-location-hero-copy">
+
+                    <div className="sa-location-state">
+                      {selectedCity.district || "Telangana"}
+                    </div>
+
+                    <h1>
+                      Packers and Movers in {selectedCity.city}
+                    </h1>
+
+                    <p className="sa-location-lead">
+                      Starting from <strong>{selectedCity.startingPrice}</strong> for local shifting in {selectedCity.city} — {selectedCity.movingTime}. Licensed, insured, and focused on organised moving support.
+                    </p>
+
+                    <div className="sa-location-actions">
+
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => setShowQuote(true)}
+                      >
+                        Get Free Quote for {selectedCity.city} Move
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn btn-dark-outline"
+                        onClick={callNow}
+                      >
+                        📞 Call Now
+                      </button>
+
+                    </div>
+
                   </div>
 
-                  <h2>
-                    {area.city}
-                  </h2>
-
-                  <p className="sa-district">
-                    {area.district}
-                  </p>
-
-                  <p className="sa-location">
-                    📍 {area.location}
-                  </p>
-
-                  <div className="sa-card-divider" />
-
-                  <div className="sa-starting-row">
-
-                    <span className="sa-starting-label">
-                      Starting from
-                    </span>
-
-                    <span className="sa-starting-price">
-                      {area.localPrice}
-                    </span>
-
-                  </div>
-
-                  <div className="sa-view-price">
-                    View Price & Location →
+                  <div className="sa-location-summary">
+                    <div>
+                      <span>Starting price</span>
+                      <strong>{selectedCity.startingPrice}</strong>
+                    </div>
+                    <div>
+                      <span>Service distance</span>
+                      <strong>{selectedCity.distance}</strong>
+                    </div>
+                    <div>
+                      <span>Location</span>
+                      <strong>{selectedCity.location}</strong>
+                    </div>
                   </div>
 
                 </div>
 
-              ))
+                <div className="sa-location-content-grid">
 
-            ) : (
+                  <div>
 
-              <div className="sa-no-results">
+                    <div className="sa-location-section">
+                      <div className="sa-eyebrow">MOVING IN {selectedCity.city.toUpperCase()}</div>
+                      <h2>Moving in {selectedCity.city}, done right</h2>
+                      <p>{selectedCity.description}</p>
+                    </div>
 
-                <div className="sa-no-results-icon">
-                  🔍
+                    <div className="sa-location-section">
+                      <h3>Local landmarks</h3>
+                      <div className="sa-landmark-list">
+                        {selectedCity.landmarks.map((landmark) => (
+                          <div key={landmark} className="sa-landmark-item">
+                            <span>📍</span>
+                            {landmark}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="sa-location-section sa-challenge-card">
+                      <h3>{selectedCity.city} moving challenges</h3>
+                      <p>{selectedCity.challenges}</p>
+                    </div>
+
+                    <div className="sa-testimonial">
+                      <div className="sa-quote-mark">“</div>
+                      <p>{selectedCity.testimonial}</p>
+                      <strong>— {selectedCity.testimonialBy}</strong>
+                    </div>
+
+                  </div>
+
+                  <div className="sa-location-map-card">
+                    <div className="sa-map-card-heading">
+                      <div>
+                        <span>📍</span>
+                        <strong>{selectedCity.city}, Telangana</strong>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          window.open(
+                            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedCity.location)}`,
+                            "_blank",
+                            "noopener,noreferrer"
+                          )
+                        }
+                      >
+                        Open in Google Maps ↗
+                      </button>
+                    </div>
+
+                    <div className="sa-map-visual" aria-label={`${selectedCity.city} location map`}>
+                      <div className="sa-map-area one" />
+                      <div className="sa-map-area two" />
+                      <div className="sa-map-road one" />
+                      <div className="sa-map-road two" />
+                      <div className="sa-map-road three" />
+                      <div className="sa-map-road four" />
+                      <div className="sa-map-marker" aria-hidden="true" />
+                      <div className="sa-map-label">
+                        {selectedCity.city}, Telangana
+                      </div>
+                    </div>
+
+                    <p>
+                      Serving all of {selectedCity.city}, Telangana from our Karimnagar head office.
+                    </p>
+                  </div>
+
                 </div>
 
-                <h3>
-                  City Not Found
-                </h3>
+                <div className="sa-services-list-section">
+                  <div className="sa-eyebrow">OUR SERVICES IN {selectedCity.city.toUpperCase()}</div>
+                  <h2>Our services in {selectedCity.city}</h2>
+                  <div className="sa-service-price-grid">
+                    {selectedCity.services.map(([name, price]) => (
+                      <div className="sa-service-price-card" key={name}>
+                        <span>{name}</span>
+                        <strong>{price}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-                <p>
-                  Try searching another city or district.
-                </p>
+                <div className="sa-location-bottom-cta">
+                  <div>
+                    <div className="sa-eyebrow">READY TO MOVE?</div>
+                    <h2>Plan your {selectedCity.city} move with Kiran Packers And Movers.</h2>
+                    <p>Share your requirement and we can discuss packing, loading, transportation and delivery support.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setShowQuote(true)}
+                  >
+                    Get Free Quote
+                  </button>
+                </div>
 
               </div>
 
-            )}
-
-          </div>
-
-        </div>
-
-      </div>
+            </div>
+          )}
 
         </section>
-
-      {/* CITY DETAILS POPUP */}
-
-      {selectedCity && (
-
-        <div
-          className="sa-overlay"
-          onClick={() =>
-            setSelectedCity(null)
-          }
-        >
-
-          <div
-            className="sa-modal"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
-
-            {/* MODAL HEADER */}
-
-            <div className="sa-modal-header">
-
-              <div>
-
-                <h2>
-                  {selectedCity.city}
-                </h2>
-
-                <p>
-                  Packers & Movers Service Area
-                </p>
-
-              </div>
-
-              <button
-                className="sa-close-button"
-                onClick={() =>
-                  setSelectedCity(null)
-                }
-              >
-                ×
-              </button>
-
-            </div>
-
-            {/* MODAL BODY */}
-
-            <div className="sa-modal-body">
-
-              {/* LOCATION */}
-
-              <div className="sa-location-box">
-
-                <div className="sa-location-icon">
-                  📍
-                </div>
-
-                <div>
-
-                  <div className="sa-location-title">
-                    Full Location
-                  </div>
-
-                  <div className="sa-location-text">
-                    {selectedCity.location}
-                  </div>
-
-                </div>
-
-              </div>
-
-              <button
-                type="button"
-                className="sa-map-button"
-                onClick={() =>
-                  window.open(
-                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedCity.location)}`,
-                    "_blank",
-                    "noopener,noreferrer"
-                  )
-                }
-              >
-                📍 Open {selectedCity.city} in Google Maps →
-              </button>
-
-              {/* DISTANCE */}
-
-              <div className="sa-distance-box">
-
-                🚚{" "}
-                <strong>
-                  Service Area:
-                </strong>{" "}
-                {selectedCity.distance}
-
-              </div>
-
-              {/* PRICE */}
-
-              <h3 className="sa-price-heading">
-                💰 Moving Price
-              </h3>
-
-              <table className="sa-price-table">
-
-                <thead>
-
-                  <tr>
-
-                    <th>
-                      Moving Service
-                    </th>
-
-                    <th>
-                      Starting Price
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody>
-
-                  <tr>
-
-                    <td>
-                      Local Moving
-                    </td>
-
-                    <td>
-                      {selectedCity.localPrice}
-                    </td>
-
-                  </tr>
-
-                  <tr>
-
-                    <td>
-                      1 BHK Household Shifting
-                    </td>
-
-                    <td>
-                      {selectedCity.oneBHK}
-                    </td>
-
-                  </tr>
-
-                  <tr>
-
-                    <td>
-                      2 BHK Household Shifting
-                    </td>
-
-                    <td>
-                      {selectedCity.twoBHK}
-                    </td>
-
-                  </tr>
-
-                  <tr>
-
-                    <td>
-                      3 BHK Household Shifting
-                    </td>
-
-                    <td>
-                      {selectedCity.threeBHK}
-                    </td>
-
-                  </tr>
-
-                  <tr>
-
-                    <td>
-                      Office / Commercial Shifting
-                    </td>
-
-                    <td>
-                      {selectedCity.office}
-                    </td>
-
-                  </tr>
-
-                </tbody>
-
-              </table>
-
-              {/* SERVICE NOTE */}
-
-              <div className="sa-service-note">
-
-                📍 We provide Packers & Movers
-                services in{" "}
-
-                <strong>
-                  {selectedCity.city}
-                </strong>{" "}
-
-                and nearby areas.
-
-              </div>
-
-              <p className="sa-price-note">
-
-                * Prices shown are estimated
-                starting prices for demonstration.
-                Final charges can vary according
-                to distance, quantity of goods,
-                packing requirements, floor level,
-                lift availability, vehicle type and
-                other moving requirements.
-
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
 
         {/* MOVING JOURNAL */}
 
@@ -4760,6 +5766,162 @@ export default function App() {
 
         </div>
 
+        {/* ADMIN LOGIN PORTAL */}
+
+        {showAdminLogin && (
+
+          <div
+            className="admin-overlay"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                closeAdminPortal();
+              }
+            }}
+          >
+
+            <div
+              className="admin-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+
+              <button
+                className="admin-close"
+                type="button"
+                onClick={closeAdminPortal}
+                aria-label="Close admin login"
+              >
+                ✕
+              </button>
+
+              <div className="admin-brand">
+                <div className="admin-brand-icon">K</div>
+
+                <div>
+                  <div className="admin-kicker">
+                    Packer & Mover Admin Portal
+                  </div>
+                  <div className="admin-brand-title">
+                    Kiran Packers And Movers
+                  </div>
+                </div>
+              </div>
+
+              <h2>Welcome Back!</h2>
+
+              <p className="admin-subtitle">
+                Please sign in to manage your logistics dashboard.
+              </p>
+
+              <form onSubmit={handleAdminLogin}>
+
+                <div className="admin-field">
+                  <label htmlFor="admin-email">
+                    Email Address
+                  </label>
+
+                  <input
+                    id="admin-email"
+                    className="admin-input"
+                    type="email"
+                    placeholder="admin@packersmovers.com"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    autoComplete="username"
+                    required
+                  />
+                </div>
+
+                <div className="admin-field">
+                  <label htmlFor="admin-password">
+                    Password
+                  </label>
+
+                  <div className="admin-input-wrap">
+                    <input
+                      id="admin-password"
+                      className="admin-input has-eye"
+                      type={showAdminPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      autoComplete="current-password"
+                      required
+                    />
+
+                    <button
+                      className="admin-eye"
+                      type="button"
+                      onClick={() =>
+                        setShowAdminPassword((value) => !value)
+                      }
+                      aria-label={
+                        showAdminPassword
+                          ? "Hide password"
+                          : "Show password"
+                      }
+                    >
+                      {showAdminPassword ? "🙈" : "👁️"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="admin-field">
+                  <label htmlFor="admin-role">
+                    Select Role
+                  </label>
+
+                  <select
+                    id="admin-role"
+                    className="admin-select"
+                    value={adminRole}
+                    onChange={(e) => setAdminRole(e.target.value)}
+                  >
+                    <option>Branch Manager</option>
+                    <option>Operations Manager</option>
+                    <option>Administrator</option>
+                  </select>
+                </div>
+
+                <div className="admin-options">
+                  <label className="remember-device">
+                    <input
+                      type="checkbox"
+                      checked={rememberDevice}
+                      onChange={(e) =>
+                        setRememberDevice(e.target.checked)
+                      }
+                    />
+                    Remember this device
+                  </label>
+
+                  <button
+                    className="forgot-password"
+                    type="button"
+                    onClick={handleForgotPassword}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+
+                <button
+                  className="admin-login-submit"
+                  type="submit"
+                >
+                  LOGIN
+                </button>
+
+                <div className="admin-security-note">
+                  🔒 Secure admin access • Authorised personnel only
+                </div>
+
+              </form>
+
+            </div>
+
+          </div>
+
+        )}
+
         {/* QUOTE MODAL */}
 
         {showQuote && (
@@ -4952,6 +6114,123 @@ export default function App() {
 
           </div>
 
+        )}
+
+        {showAddLocation && (
+          <div
+            className="sa-add-location-overlay"
+            onClick={() => setShowAddLocation(false)}
+          >
+            <div
+              className="sa-add-location-modal"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="sa-add-location-header">
+                <div>
+                  <h2>Add New Location</h2>
+                  <p>
+                    Add another city to your Service Areas list. It will be saved on this browser.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="sa-add-location-close"
+                  onClick={() => setShowAddLocation(false)}
+                  aria-label="Close add location"
+                >
+                  ×
+                </button>
+              </div>
+
+              <form
+                className="sa-add-location-form"
+                onSubmit={handleAddLocation}
+              >
+                <div className="sa-form-field">
+                  <label htmlFor="new-location-city">City Name</label>
+                  <input
+                    id="new-location-city"
+                    type="text"
+                    value={newLocation.city}
+                    onChange={(event) =>
+                      setNewLocation((current) => ({
+                        ...current,
+                        city: event.target.value,
+                      }))
+                    }
+                    placeholder="Enter city name"
+                    required
+                  />
+                </div>
+
+                <div className="sa-form-field">
+                  <label htmlFor="new-location-state">State</label>
+                  <input
+                    id="new-location-state"
+                    type="text"
+                    value={newLocation.state}
+                    onChange={(event) =>
+                      setNewLocation((current) => ({
+                        ...current,
+                        state: event.target.value,
+                      }))
+                    }
+                    placeholder="Enter state"
+                  />
+                </div>
+
+                <div className="sa-form-field">
+                  <label htmlFor="new-location-price">Starting Price</label>
+                  <input
+                    id="new-location-price"
+                    type="text"
+                    value={newLocation.startingPrice}
+                    onChange={(event) =>
+                      setNewLocation((current) => ({
+                        ...current,
+                        startingPrice: event.target.value,
+                      }))
+                    }
+                    placeholder="₹3,999"
+                  />
+                </div>
+
+                <div className="sa-form-field">
+                  <label htmlFor="new-location-time">Moving Time</label>
+                  <input
+                    id="new-location-time"
+                    type="text"
+                    value={newLocation.movingTime}
+                    onChange={(event) =>
+                      setNewLocation((current) => ({
+                        ...current,
+                        movingTime: event.target.value,
+                      }))
+                    }
+                    placeholder="Same-day local support"
+                  />
+                </div>
+
+                <div className="sa-add-location-actions">
+                  <button
+                    type="button"
+                    className="sa-add-cancel"
+                    onClick={() => setShowAddLocation(false)}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="sa-add-submit"
+                  >
+                    Add Location
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
 
         {/* SERVICE MODAL */}
